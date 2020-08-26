@@ -1,0 +1,87 @@
+December 2019 release of PcapPlusPlus (v19.12)
+==============================================
+
+PcapPlusPlus web-site:  https://pcapplusplus.github.io/
+
+GitHub page:            https://github.com/seladb/PcapPlusPlus
+
+
+This package contains:
+----------------------
+
+ - PcapPlusPlus compiled libraries
+    - libCommon++.a
+    - libPacket++.a
+    - libPcap++.a
+ - PcapPlusPlus header files (under `header/`)
+ - Compiled examples (under `examples/`)
+ - Installation scripts (`install.sh` & `uninstall.sh`)
+ - Code example with a simple Makefile showing how to build applications using PcapPlusPlus compiled binaries (under `example-app/`)
+
+
+Installation:
+-------------
+
+ - For installing the package simply run: `sudo ./install.sh`
+
+
+Running the examples:
+---------------------
+
+ - Make sure you have libpcap installed (it should come built-in with most Linux distributions)
+ - You may need to run the executables as sudo
+
+
+In order to compile your application with these binaries you need to:
+---------------------------------------------------------------------
+
+ - Make sure you have libpcap developer pack installed (in Ubuntu: install it using apt-get: `sudo apt-get install libpcap-dev`)
+ - Make sure the binaries match your OS (for example: `pcapplusplus-19.12-ubuntu-16.04-x86-64-gcc-4.8.tar.gz` pack may not work in Ubuntu 14.04)
+ - Make sure your gcc/g++ version matches the compiled binaries version (for example: `pcapplusplus-19.12-ubuntu-16.04-x86-64-gcc-4.8.tar.gz` pack may not work with gcc 4.9)
+ - Make sure PcapPlusPlus is installed (see Installation section above)
+ - Include `/usr/local/etc/PcapPlusPlus.mk` in your Makefile and add PcapPlusPlus includes and libs in relevant places in your Makefile 
+     - You may follow the example under `example-app/`
+
+
+Release notes (changes from v19.04)
+-----------------------------------
+
+- Added support for Visual Studio 2017 and 2019
+- Added support for DPDK 19.08 (thanks @gx740 !)
+- Major improvements in TCP reassembly (thanks @gx740 !):
+    - Reducing memory consumption by cleaning up old connections 
+    - A lot of performance and code optimizations
+- Added out-of-the-box support for MacOS 10.14 Mojave and later
+- Added support for FreeBSD (thanks @rickyzhang82 !)
+- Added support for GTP v1 protocol
+- Added DPDK KNI support (thanks @echo-Mike !)
+- Added KniPong example to demo the new KNI API (thanks @echo-Mike !)
+- Lots of performance optimizations and code cleanups (special thanks to @gx740 !)
+- Major revamp of reading/writing pcapng files - use streaming instead of memory copies and added support for compression (thanks @Dysl3xik !)
+- Added support for [pcap_setdirection](https://linux.die.net/man/3/pcap_setdirection) in `PcapLiveDevice` (thanks @MrSiz !)
+- Performance optimization and fixes in IPReassembly (thanks @gx740, @silviucpp !)
+- Added a new `BPFStringFilter` pcap filter to handle raw BPF filter strings and deprecated the old `IPcapDevice::matchPacketWithFilter()` API (thanks @Dysl3xik !)
+- Let the user add custom LDFLAGS to the main Makefile (thanks @rom1sqr !)
+- Added data validations in `IPv4Layer` before parsing the next layers (thanks @gx740 !)
+- Created a new unit-test framework to make it easier to write unit-tests
+- Replaced old 3rd-party __debug-new__ with new homegrown [MemPlumber](https://github.com/seladb/MemPlumber)
+- Tons of bug fixes (special thanks to @gx740 , @echo-Mike , @Dysl3xik !)
+
+Contributors
+------------
+
+Thank you for everyone who contributed to this release:
+
+- @gx740 
+- @echo-Mike 
+- @Dysl3xik 
+- @rickyzhang82 
+- @MrSiz 
+- Roman Koshelev
+- @silviucpp
+- @eteran 
+- @tomerb 
+- @Minilulatsch
+- @rom1sqr 
+- @christinaa 
+- @russkel 
