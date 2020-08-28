@@ -4,9 +4,10 @@ include /usr/local/etc/PcapPlusPlus.mk
 all:
 	g++ $(PCAPPP_INCLUDES) -c -o Main.o Main.cpp
 	g++ $(PCAPPP_INCLUDES) -c -o Parser.o Parser.cpp
-	g++ $(PCAPPP_LIBS_DIR) -o Main Main.o Parser.o $(PCAPPP_LIBS)
+	g++ $(PCAPPP_INCLUDES) -c -o Matcher.o Matcher.cpp
+	g++ $(PCAPPP_LIBS_DIR) -o Main Main.o Parser.o Matcher.o $(PCAPPP_LIBS)
 
 # Clean Target
 clean:
-	rm Main.o Parser.o
+	rm Main.o Parser.o Matcher.o
 	rm Main

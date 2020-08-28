@@ -7,11 +7,12 @@
 #include <fstream>
 #include <sstream>
 #include "RuleHeader.h"
+#include "Matcher.h"
 
 using namespace std;
 using namespace pcpp;
 
-vector<RuleHeader> Rules; 
+vector<RuleHeader> Rules;
 
 void getRules(string filePath)
 {
@@ -114,6 +115,25 @@ static void onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, 
 	cout << "Scr Port: " << srcPort << endl;
 	cout << "Dst Port: " << dstPort << endl;
 	cout << "Application Protocol: " << applicationProtocol.c_str() << endl;
+
+	string action = "pass";
+
+	for (auto &rule : Rules)
+	{
+		if ((matchProtocol(rule.protocol, networkProtocol.c_str()) ||
+			 matchProtocol(rule.protocol, transportProtocol.c_str()) ||
+			 matchProtocol(rule.protocol, applicationProtocol.c_str())) &&
+			matchIp(rule.srcIp, srcIP.c_str()) &&
+			matchIp(rule.dstIp, dstIP.c_str()) &&
+			matchPort(rule.srcPort, to_string(srcPort)) &&
+			matchPort(rule.dstPort, to_string(dstPort)))
+		{
+			action = rule.action;
+			break;
+		}
+	}
+	cout << "Action: " << action << endl;
+
 	cout << endl;
 }
 
@@ -121,7 +141,7 @@ int main(int argc, char *argv[])
 {
 	string filePath = "/home/chutichnuoc/ppp_ids/rules/test.rules";
 	getRules(filePath);
-	cout << Rules.size() << endl; 
+	cout << Rules.size() << endl;
 
 	cout << "List devices:" << endl
 		 << endl;
