@@ -8,6 +8,7 @@
 #include <sstream>
 #include "RuleHeader.h"
 #include "Matcher.h"
+#include <sys/wait.h>
 
 using namespace std;
 using namespace pcpp;
@@ -31,6 +32,36 @@ void getRules(string filePath)
 		Rules.push_back(rule);
 	}
 	infile.close();
+}
+
+void setupIptables()
+{
+	for (auto &rule : Rules)
+	{
+		if (rule.action.compare("drop") == 0)
+		{
+			char *protocol = new char[rule.protocol.length() + 1];
+			strcpy(protocol, rule.protocol.c_str());
+			char *srcIp = new char[rule.srcIp.length() + 1];
+			strcpy(srcIp, rule.srcIp.c_str());
+			char *dstIp = new char[rule.dstIp.length() + 1];
+			strcpy(dstIp, rule.dstIp.c_str());
+			char *srcPort = new char[rule.srcPort.length() + 1];
+			strcpy(srcPort, rule.srcPort.c_str());
+			char *dstPort = new char[rule.dstPort.length() + 1];
+			strcpy(dstPort, rule.dstPort.c_str());
+
+			char *cmd = "iptables";
+			char *args[] = {cmd, "-I", "INPUT", "-p", protocol, "-s", srcIp, "-d", dstIp, "-j", "DROP", NULL};
+
+			int pid = fork();
+			if (pid == 0)
+			{
+				std::cout << "<debug 1>" << endl;
+				execvp(cmd, args);
+			}
+		}
+	}
 }
 
 void printDeviceInfo(pcpp::PcapLiveDevice *dev)
@@ -141,16 +172,17 @@ int main(int argc, char *argv[])
 {
 	string filePath = "/home/chutichnuoc/ppp_ids/rules/test.rules";
 	getRules(filePath);
+	setupIptables();
 
 	std::cout << "List devices:" << endl
-		 << endl;
+			  << endl;
 	for (int i = 0; i < PcapLiveDeviceList::getInstance().getPcapLiveDevicesList().size(); i++)
 	{
 		std::cout << "Device no " << i + 1 << " " << PcapLiveDeviceList::getInstance().getPcapLiveDevicesList()[i]->getName() << endl;
 	}
 	int deviceNo = 1;
 	std::cout << endl
-		 << "Choose a divece to capture: ";
+			  << "Choose a divece to capture: ";
 	cin >> deviceNo;
 	PcapLiveDevice *dev = PcapLiveDeviceList::getInstance().getPcapLiveDevicesList()[deviceNo - 1];
 
@@ -169,7 +201,7 @@ int main(int argc, char *argv[])
 	}
 
 	std::cout << endl
-		 << "Starting async capture..." << endl;
+			  << "Starting async capture..." << endl;
 
 	// start capture in async mode. Give a callback function to call to whenever a packet is captured and the stats object as the cookie
 	dev->startCapture(onPacketArrives, 0);
