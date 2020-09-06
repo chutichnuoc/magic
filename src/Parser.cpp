@@ -112,3 +112,11 @@ std::string printHttpMethod(pcpp::HttpRequestLayer::HttpMethod httpMethod)
 		return "Other";
 	}
 }
+
+void printPayload(pcpp::Packet parsedPacket)
+{
+	pcpp::PayloadLayer *payloadLayer = parsedPacket.getLayerOfType<pcpp::PayloadLayer>();
+	
+	std::cout << "getPayloadLen(): " << payloadLayer->getPayloadLen() << std::endl;
+	std::cout << "getPayload(): " <<  static_cast<void*>(payloadLayer->getPayload()) << std::endl;
+}

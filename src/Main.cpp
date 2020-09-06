@@ -35,15 +35,15 @@ void getRules(string filePath)
 
 void printDeviceInfo(pcpp::PcapLiveDevice *dev)
 {
-	cout << "Interface info:" << endl;
-	cout << "   Interface name:        " << dev->getName() << endl;
-	cout << "   Interface description: " << dev->getDesc() << endl;
-	cout << "   MAC address:           " << dev->getMacAddress().toString().c_str() << endl;
-	cout << "   Default gateway:       " << dev->getDefaultGateway().toString().c_str() << endl;
-	cout << "   Interface MTU:         " << dev->getMtu() << endl;
+	std::cout << "Interface info:" << endl;
+	std::cout << "   Interface name:        " << dev->getName() << endl;
+	std::cout << "   Interface description: " << dev->getDesc() << endl;
+	std::cout << "   MAC address:           " << dev->getMacAddress().toString().c_str() << endl;
+	std::cout << "   Default gateway:       " << dev->getDefaultGateway().toString().c_str() << endl;
+	std::cout << "   Interface MTU:         " << dev->getMtu() << endl;
 	if (dev->getDnsServers().size() > 0)
 	{
-		cout << "   DNS server:            " << dev->getDnsServers().at(0).toString().c_str() << endl;
+		std::cout << "   DNS server:            " << dev->getDnsServers().at(0).toString().c_str() << endl;
 	}
 }
 
@@ -61,6 +61,7 @@ static void onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, 
 	std::string networkProtocol("unknown");
 	std::string transportProtocol("unknown");
 	std::string applicationProtocol("unknown");
+	std::string action("pass");
 
 	for (pcpp::Layer *curLayer = parsedPacket.getFirstLayer(); curLayer != NULL; curLayer = curLayer->getNextLayer())
 	{
@@ -103,20 +104,19 @@ static void onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, 
 			break;
 			// default:
 			// 	return "Unknown";
+		case pcpp::GenericPayload:
+			printPayload(parsedPacket);
+			break;
 		}
 	}
-	cout << endl;
-	cout << "Scr MAC: " << srcMac.c_str() << endl;
-	cout << "Dst MAC: " << dstMac.c_str() << endl;
-	cout << "Network Protocol: " << networkProtocol.c_str() << endl;
-	cout << "Scr IP: " << srcIP.c_str() << endl;
-	cout << "Dst IP: " << dstIP.c_str() << endl;
-	cout << "Transport Protocol: " << transportProtocol.c_str() << endl;
-	cout << "Scr Port: " << srcPort << endl;
-	cout << "Dst Port: " << dstPort << endl;
-	cout << "Application Protocol: " << applicationProtocol.c_str() << endl;
-
-	string action = "pass";
+	std::cout << endl;
+	// std::cout << "Scr MAC: " << srcMac.c_str() << endl;
+	// std::cout << "Dst MAC: " << dstMac.c_str() << endl;
+	std::cout << "Network Protocol: " << networkProtocol.c_str() << endl;
+	std::cout << "Transport Protocol: " << transportProtocol.c_str() << endl;
+	std::cout << "Application Protocol: " << applicationProtocol.c_str() << endl;
+	std::cout << "Scr IP: " << srcIP.c_str() << ":" << srcPort << endl;
+	std::cout << "Dst IP: " << dstIP.c_str() << ":" << dstPort << endl;
 
 	for (auto &rule : Rules)
 	{
@@ -132,32 +132,31 @@ static void onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, 
 			break;
 		}
 	}
-	cout << "Action: " << action << endl;
+	std::cout << "Action: " << action << endl;
 
-	cout << endl;
+	std::cout << endl;
 }
 
 int main(int argc, char *argv[])
 {
 	string filePath = "/home/chutichnuoc/ppp_ids/rules/test.rules";
 	getRules(filePath);
-	cout << Rules.size() << endl;
 
-	cout << "List devices:" << endl
+	std::cout << "List devices:" << endl
 		 << endl;
 	for (int i = 0; i < PcapLiveDeviceList::getInstance().getPcapLiveDevicesList().size(); i++)
 	{
-		cout << "Device no " << i + 1 << " " << PcapLiveDeviceList::getInstance().getPcapLiveDevicesList()[i]->getName() << endl;
+		std::cout << "Device no " << i + 1 << " " << PcapLiveDeviceList::getInstance().getPcapLiveDevicesList()[i]->getName() << endl;
 	}
 	int deviceNo = 1;
-	cout << endl
+	std::cout << endl
 		 << "Choose a divece to capture: ";
 	cin >> deviceNo;
 	PcapLiveDevice *dev = PcapLiveDeviceList::getInstance().getPcapLiveDevicesList()[deviceNo - 1];
 
 	if (dev == NULL)
 	{
-		cout << "Cannot find interface with name of '" << PcapLiveDeviceList::getInstance().getPcapLiveDevicesList()[deviceNo - 1]->getName() << "'" << endl;
+		std::cout << "Cannot find interface with name of '" << PcapLiveDeviceList::getInstance().getPcapLiveDevicesList()[deviceNo - 1]->getName() << "'" << endl;
 		exit(1);
 	}
 
@@ -165,11 +164,11 @@ int main(int argc, char *argv[])
 
 	if (!dev->open())
 	{
-		cout << "Cannot open device" << endl;
+		std::cout << "Cannot open device" << endl;
 		exit(1);
 	}
 
-	cout << endl
+	std::cout << endl
 		 << "Starting async capture..." << endl;
 
 	// start capture in async mode. Give a callback function to call to whenever a packet is captured and the stats object as the cookie
@@ -184,5 +183,5 @@ int main(int argc, char *argv[])
 	// close the device before application ends
 	dev->close();
 
-	cout << "Done!" << endl;
+	std::cout << "Done!" << endl;
 }

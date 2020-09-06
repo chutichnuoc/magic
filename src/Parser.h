@@ -9,7 +9,9 @@
 #include "IcmpLayer.h"
 #include "HttpLayer.h"
 #include "SSLLayer.h"
+#include "PayloadLayer.h"
 #include <arpa/inet.h>
+#include <iostream>
 
 void parseEthLayer(pcpp::Packet parsedPacket, std::string *srcMac, std::string *dstMac);
 void parseIpv4Layer(pcpp::Packet parsedPacket, std::string *srcIP, std::string *dstIP);
@@ -19,5 +21,6 @@ void parseUdpLayer(pcpp::Packet parsedPacket, int *srcPort, int *dstPort);
 void printHttpLayer(pcpp::Packet parsedPacket);
 void printSSLLayer(pcpp::Packet parsedPacket);
 std::string printHttpMethod(pcpp::HttpRequestLayer::HttpMethod httpMethod);
+void printPayload(pcpp::Packet parsedPacket);
 
 #endif
