@@ -111,7 +111,7 @@ namespace pcpp
 	enum IPv4OptionTypes
 	{
 		/** End of Options List */
-		IPV4OPT_EndOfOtionsList = 0,
+		IPV4OPT_EndOfOptionsList = 0,
 		/** No Operation */
 		IPV4OPT_NOP = 1,
 		/** Record Route */
@@ -241,7 +241,7 @@ namespace pcpp
 
 			uint8_t valueOffset = (uint8_t)(1);
 
-			while (valueOffset < dataSize)
+			while ((size_t)valueOffset < dataSize)
 			{
 				uint32_t curValue;
 				memcpy(&curValue, m_Data->recordValue + valueOffset, sizeof(uint32_t));
@@ -283,7 +283,7 @@ namespace pcpp
 			uint8_t valueOffset = (uint8_t)(2);
 			bool readIPAddr = (res.type == IPv4TimestampOptionValue::TimestampAndIP);
 
-			while (valueOffset < dataSize)
+			while ((size_t)valueOffset < dataSize)
 			{
 				uint32_t curValue;
 				memcpy(&curValue, m_Data->recordValue + valueOffset, sizeof(uint32_t));
@@ -323,7 +323,7 @@ namespace pcpp
 			if (m_Data == NULL)
 				return 0;
 
-			if (getIPv4OptionType() == (uint8_t)IPV4OPT_EndOfOtionsList || m_Data->recordType == (uint8_t)IPV4OPT_NOP)
+			if (getIPv4OptionType() == (uint8_t)IPV4OPT_EndOfOptionsList || m_Data->recordType == (uint8_t)IPV4OPT_NOP)
 				return sizeof(uint8_t);
 
 			return (size_t)m_Data->recordLen;
@@ -334,7 +334,7 @@ namespace pcpp
 			if (m_Data == NULL)
 				return 0;
 
-			if (getIPv4OptionType() == (uint8_t)IPV4OPT_EndOfOtionsList || m_Data->recordType == (uint8_t)IPV4OPT_NOP)
+			if (getIPv4OptionType() == (uint8_t)IPV4OPT_EndOfOptionsList || m_Data->recordType == (uint8_t)IPV4OPT_NOP)
 				return (size_t)0;
 
 			return (size_t)m_Data->recordLen - (2*sizeof(uint8_t));
@@ -359,7 +359,7 @@ namespace pcpp
 		 * retrieved by calling build()
 		 * @param[in] optionType IPv4 option type
 		 * @param[in] optionValue A buffer containing the option value. This buffer is read-only and isn't modified in any way.
-		 * For option types ::IPV4OPT_NOP and ::IPV4OPT_EndOfOtionsList this parameter is ignored (expected to be NULL) as these
+		 * For option types ::IPV4OPT_NOP and ::IPV4OPT_EndOfOptionsList this parameter is ignored (expected to be NULL) as these
 		 * option types don't contain any data
 		 * @param[in] optionValueLen Option value length in bytes
 		 */
@@ -460,7 +460,7 @@ namespace pcpp
 		 * Get the source IP address in the form of IPv4Address
 		 * @return An IPv4Address containing the source address
 		 */
-		IPv4Address getSrcIpAddress() const { return IPv4Address(getIPv4Header()->ipSrc); }
+		IPv4Address getSrcIpAddress() const { return getIPv4Header()->ipSrc; }
 
 		/**
 		 * Set the source IP address
@@ -472,7 +472,7 @@ namespace pcpp
 		 * Get the destination IP address in the form of IPv4Address
 		 * @return An IPv4Address containing the destination address
 		 */
-		IPv4Address getDstIpAddress() const { return IPv4Address(getIPv4Header()->ipDst); }
+		IPv4Address getDstIpAddress() const { return getIPv4Header()->ipDst; }
 
 		/**
 		 * Set the dest IP address
@@ -601,7 +601,7 @@ namespace pcpp
 		 * @param[in] dataLen The length of byte stream
 		 * @return True if the data is valid and can represent the IPv4 packet
 		 */
-		static bool isDataValid(const uint8_t* data, size_t dataLen);
+		static inline bool isDataValid(const uint8_t* data, size_t dataLen);
 
 	private:
 		int m_NumOfTrailingBytes;
@@ -615,6 +615,15 @@ namespace pcpp
 		void initLayer();
 		void initLayerInPacket(uint8_t* data, size_t dataLen, Layer* prevLayer, Packet* packet, bool setTotalLenAsDataLen);
 	};
+
+
+	// implementation of inline methods
+
+	bool IPv4Layer::isDataValid(const uint8_t* data, size_t dataLen)
+	{
+		const iphdr* hdr = reinterpret_cast<const iphdr*>(data);
+		return dataLen >= sizeof(iphdr) && hdr->ipVersion == 4 && hdr->internetHeaderLength >= 5;
+	}
 
 } // namespace pcpp
 

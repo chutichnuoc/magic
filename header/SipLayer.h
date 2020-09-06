@@ -112,6 +112,12 @@ namespace pcpp
 		 */
 		void computeCalculateFields();
 
+		/**
+		 * A static method that checks whether the port is considered as SIP
+		 * @param[in] port The port number to be checked
+		 */
+		static bool isSipPort(uint16_t port) { return port == 5060 || port == 5061; }
+
 	protected:
 		SipLayer(uint8_t* data, size_t dataLen, Layer* prevLayer, Packet* packet) : TextBasedProtocolMessage(data, dataLen, prevLayer, packet) {}
 		SipLayer() : TextBasedProtocolMessage() {}
@@ -122,7 +128,6 @@ namespace pcpp
 		char getHeaderFieldNameValueSeparator() const { return ':'; }
 		bool spacesAllowedBetweenHeaderFieldNameAndValue() const { return true; }
 	};
-
 
 
 	class SipRequestFirstLine;
@@ -613,6 +618,14 @@ namespace pcpp
 		static SipResponseLayer::SipResponseStatusCode parseStatusCode(char* data, size_t dataLen);
 
 		/**
+		 * A static method for parsing the SIP version out of raw data
+		 * @param[in] data The raw data
+		 * @param[in] dataLen The raw data length
+		 * @return The parsed SIP version string or an empty string if version cannot be extracted
+		 */
+		static std::string parseVersion(char* data, size_t dataLen);
+
+		/**
 		 * @return The size in bytes of the SIP response first line
 		 */
 		int getSize() const { return m_FirstLineEndOffset; }
@@ -648,7 +661,6 @@ namespace pcpp
 		SipResponseFirstLine(SipResponseLayer* sipResponse);
 		SipResponseFirstLine(SipResponseLayer* sipResponse,  std::string version, SipResponseLayer::SipResponseStatusCode statusCode, std::string statusCodeString = "");
 
-		static std::string parseVersion(char* data, size_t dataLen);
 		static SipResponseLayer::SipResponseStatusCode validateStatusCode(char* data, size_t dataLen, SipResponseLayer::SipResponseStatusCode potentialCode);
 
 

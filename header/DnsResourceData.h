@@ -3,6 +3,7 @@
 
 #include "DnsResource.h"
 #include "IpAddress.h"
+#include <memory>
 #include <string>
 #include <stdint.h>
 
@@ -369,6 +370,12 @@ namespace pcpp
 		 * @param[in] dataAsHexString A hex string that represents the DNS RR data
 		 */
 		GenericDnsResourceData(const std::string& dataAsHexString);
+
+		/**
+		 * A copy c'tor for this class
+		 * @param[in] other The instance to copy from
+		 */
+		GenericDnsResourceData(const GenericDnsResourceData& other);
 
 		~GenericDnsResourceData() { if (m_Data != NULL) delete [] m_Data; }
 

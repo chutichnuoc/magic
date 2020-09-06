@@ -51,6 +51,7 @@ namespace pcpp
 		PacketLogModuleSdpLayer, ///< SdpLayer module (Packet++)
 		PacketLogModuleRadiusLayer, ///< RadiusLayer module (Packet++)
 		PacketLogModuleGtpLayer, ///< GtpLayer module (Packet++)
+		PacketLogModuleBgpLayer, ///< GtpLayer module (Packet++)
 		PacketLogModuleTcpReassembly, ///< TcpReassembly module (Packet++)
 		PacketLogModuleIPReassembly, ///< IPReassembly module (Packet++)
 		PcapLogModuleWinPcapLiveDevice, ///< WinPcapLiveDevice module (Pcap++)
@@ -189,7 +190,7 @@ namespace pcpp
 #define LOG_ERROR(format, ...) do { \
 			if (!pcpp::LoggerPP::getInstance().isSupressErrors()) {\
 				if(pcpp::LoggerPP::getInstance().isErrorStringSet()) \
-					snprintf(pcpp::LoggerPP::getInstance().getErrorString(), pcpp::LoggerPP::getInstance().getErrorStringLength(), format "\n", ## __VA_ARGS__); \
+					snprintf(pcpp::LoggerPP::getInstance().getErrorString(), pcpp::LoggerPP::getInstance().getErrorStringLength(), format, ## __VA_ARGS__); \
 				else \
 					fprintf(stderr, format "\n", ## __VA_ARGS__); \
 			} \

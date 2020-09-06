@@ -1,5 +1,5 @@
-December 2019 release of PcapPlusPlus (v19.12)
-==============================================
+August 2020 release of PcapPlusPlus (v20.08)
+============================================
 
 PcapPlusPlus web-site:  https://pcapplusplus.github.io/
 
@@ -36,52 +36,69 @@ In order to compile your application with these binaries you need to:
 ---------------------------------------------------------------------
 
  - Make sure you have libpcap developer pack installed (in Ubuntu: install it using apt-get: `sudo apt-get install libpcap-dev`)
- - Make sure the binaries match your OS (for example: `pcapplusplus-19.12-ubuntu-16.04-x86-64-gcc-4.8.tar.gz` pack may not work in Ubuntu 14.04)
- - Make sure your gcc/g++ version matches the compiled binaries version (for example: `pcapplusplus-19.12-ubuntu-16.04-x86-64-gcc-4.8.tar.gz` pack may not work with gcc 4.9)
+ - Make sure the binaries match your OS (for example: `pcapplusplus-20.08-ubuntu-20.04-gcc-9.tar.gz` pack may not work in Ubuntu 16.04)
+ - Make sure your gcc/g++ version matches the compiled binaries version (for example: `pcapplusplus-20.08-ubuntu-20.04-gcc-9.tar.gz` pack may not work with gcc 4.9)
  - Make sure PcapPlusPlus is installed (see Installation section above)
  - Include `/usr/local/etc/PcapPlusPlus.mk` in your Makefile and add PcapPlusPlus includes and libs in relevant places in your Makefile 
      - You may follow the example under `example-app/`
 
 
-Release notes (changes from v19.04)
+Release notes (changes from v19.12)
 -----------------------------------
 
-- Added support for Visual Studio 2017 and 2019
-- Added support for DPDK 19.08 (thanks @gx740 !)
-- Major improvements in TCP reassembly (thanks @gx740 !):
-    - Reducing memory consumption by cleaning up old connections 
-    - A lot of performance and code optimizations
-- Added out-of-the-box support for MacOS 10.14 Mojave and later
-- Added support for FreeBSD (thanks @rickyzhang82 !)
-- Added support for GTP v1 protocol
-- Added DPDK KNI support (thanks @echo-Mike !)
-- Added KniPong example to demo the new KNI API (thanks @echo-Mike !)
-- Lots of performance optimizations and code cleanups (special thanks to @gx740 !)
-- Major revamp of reading/writing pcapng files - use streaming instead of memory copies and added support for compression (thanks @Dysl3xik !)
-- Added support for [pcap_setdirection](https://linux.die.net/man/3/pcap_setdirection) in `PcapLiveDevice` (thanks @MrSiz !)
-- Performance optimization and fixes in IPReassembly (thanks @gx740, @silviucpp !)
-- Added a new `BPFStringFilter` pcap filter to handle raw BPF filter strings and deprecated the old `IPcapDevice::matchPacketWithFilter()` API (thanks @Dysl3xik !)
-- Let the user add custom LDFLAGS to the main Makefile (thanks @rom1sqr !)
-- Added data validations in `IPv4Layer` before parsing the next layers (thanks @gx740 !)
-- Created a new unit-test framework to make it easier to write unit-tests
-- Replaced old 3rd-party __debug-new__ with new homegrown [MemPlumber](https://github.com/seladb/MemPlumber)
-- Tons of bug fixes (special thanks to @gx740 , @echo-Mike , @Dysl3xik !)
+ - Major security and quality improvements:
+   - PcapPlusPlus was added to [Google OSS-Fuzz](https://google.github.io/oss-fuzz/) which uses the [Fuzz testing](https://en.wikipedia.org/wiki/Fuzzing) technique to discover security vulnerabilities and stability bugs (thank you @zlowram !)
+   - Created a new regression test suite for OSS-Fuzz bugfixes under [`Tests/Fuzzers/RegressionTests`](https://github.com/seladb/PcapPlusPlus/tree/master/Tests/Fuzzers/RegressionTests) (thank you @zlowram !)
+   - Added [LGTM](https://lgtm.com/projects/g/seladb/PcapPlusPlus) integration to enable continuous code analysis and prevent critical vulnerabilities (thank you @alexey-tereshenkov-oxb !)
+   - More than 60 issues were found by OSS-Fuzz and LGTM and fixed in this release
+   - Revamped Packet++Test and Pcap++Test: tests are now more structured, divided into multiple files and use common and more intuitive test infrastructure
+   - Added a new test suite (written in Python) for [PcapPlusPlus examples](https://github.com/seladb/PcapPlusPlus/tree/master/Examples) under [`Tests/ExamplesTests`](https://github.com/seladb/PcapPlusPlus/tree/master/Tests/ExamplesTest)
+ - Added [Npcap](https://nmap.org/npcap/) support for Windows (in parallel to WinPcap support)
+ - Added DPDK 19.11 (LTS) support
+ - New supported protocols:
+   - BGP v4
+   - IEEE 802.3 Ethernet
+ - New platforms officially supported:
+   - MacOS Catalina (10.15)
+   - Ubuntu 20.04
+ - A complete rewrite of the IP address classes `IPv4Address`, `IPv6Address` and `IPAddress` to make them more efficient and easy to use (thank you @gx740 !)
+ - In addition, new features were added to IP address classes:
+   - Added "less than" comparison operator (thank you @maruu !)
+   - Added subnet match for `IPv6Address` (thank you @DinoStray !)
+ - Performance optimization, readability improvements and code cleanup in various parts of the code (thank you @maruu and @gx740 !)
+ - Integrated streaming ZStd compression for pcapng files (thank you @Dysl3xik !)
+ - Pcap/pcapng files:
+   - Read and write in nanoseconds precision for pcapng files (thank you @akvinikym !)
+   - Enable `flush` for pcap and pcapng file writers (thank you @rickyzhang82 and @l-henken !)
+ - TCP reassembly returns status in every call to `TcpReassembly::reassemblePacket()` (thank you @starliiit !) 
+ - Added port filter to `HttpAnalyzer` (thank you @makefriend8 !)
+ - Support for setting snapshot length in `PcapLiveDevice` (thank you @wongsingfo !)
+ - `GeneralFilter::matchPacketWithFilter()` can now match packet of any link type (thank you @skorup101 !)
+ - Added user link types 147-162 to support custom protocols (thank you @l-henken !)
+ - Tons of bug fixes (thank you everyone who reported issues and contributed bugfixes!)
+
 
 Contributors
 ------------
 
 Thank you for everyone who contributed to this release:
 
-- @gx740 
-- @echo-Mike 
-- @Dysl3xik 
-- @rickyzhang82 
-- @MrSiz 
-- Roman Koshelev
-- @silviucpp
-- @eteran 
-- @tomerb 
-- @Minilulatsch
-- @rom1sqr 
-- @christinaa 
-- @russkel 
+ - @gx740 
+ - @Dysl3xik 
+ - @maruu 
+ - @zlowram 
+ - @akvinikym
+ - @alexey-tereshenkov-oxb 
+ - @rickyzhang82 
+ - @DinoStray 
+ - @l-henken 
+ - @skorup101 
+ - @starliiit 
+ - @NanXiao 
+ - @makefriend8
+ - @v0l0dia
+ - @wongsingfo 
+ - @mchuahua
+ - @NinethDimension
+ - @OrkunTokdemir
+ - @fquinner

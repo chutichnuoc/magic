@@ -78,13 +78,13 @@ namespace pcpp
 		friend class PcapLiveDeviceList;
 	protected:
 		// This is a second descriptor for the same device. It is needed because of a bug
-		// that occurs in libpcap on Linux (on Windows using WinPcap it works well):
+		// that occurs in libpcap on Linux (on Windows using WinPcap/Npcap it works well):
 		// It's impossible to capture packets sent by the same descriptor
 		pcap_t* m_PcapSendDescriptor;
 		const char* m_Name;
 		const char* m_Description;
 		bool m_IsLoopback;
-		uint16_t m_DeviceMtu;
+		uint32_t m_DeviceMtu;
 		std::vector<pcap_addr_t> m_Addresses;
 		MacAddress m_MacAddress;
 		IPv4Address m_DefaultGateway;
@@ -129,9 +129,9 @@ namespace pcpp
 		{
 			/** libPcap live device */
 			LibPcapDevice,
-			/** WinPcap live device */
+			/** WinPcap/Npcap live device */
 			WinPcapDevice,
-			/** WinPcap Remote Capture device */
+			/** WinPcap/Npcap Remote Capture device */
 			RemoteDevice
 		};
 
@@ -195,21 +195,37 @@ namespace pcpp
 			PcapDirection direction;
 
 			/**
+			 * Set the snapshot length. Snapshot length is the amount of data for each frame that is actually captured. Note that taking
+			 * larger snapshots both increases the amount of time it takes to process packets and, effectively, decreases the amount of
+			 * packet buffering. This may cause packets to be lost. Note also that taking smaller snapshots will discard data from protocols
+			 * above the transport layer, which loses information that may be important.
+			 * You can read more here:
+			 * https://wiki.wireshark.org/SnapLen
+			*/
+			int snapshotLength;
+
+			/**
 			 * A c'tor for this struct
 			 * @param[in] mode The mode to open the device: promiscuous or non-promiscuous. Default value is promiscuous
 			 * @param[in] packetBufferTimeoutMs Buffer timeout in millisecond. Default value is 0 which means set timeout of
 			 * 1 or -1 (depends on the platform)
 			 * @param[in] packetBufferSize The packet buffer size. Default value is 0 which means use the default value
 			 * (varies between different OS's)
-			 * @param[in] direction Direction for capturing packtes. Default value is INOUT which means capture both incoming
+			 * @param[in] direction Direction for capturing packets. Default value is INOUT which means capture both incoming
 			 * and outgoing packets (not all platforms support this)
-			 */
-			DeviceConfiguration(DeviceMode mode = Promiscuous, int packetBufferTimeoutMs = 0, int packetBufferSize = 0, PcapDirection direction = PCPP_INOUT)
+			 * @param[in] snapshotLength Snapshot length for capturing packets. Default value is 0 which means use the default value.
+			 * A snapshot length of 262144 should be big enough for maximum-size Linux loopback packets (65549) and some USB packets
+			 * captured with USBPcap (> 131072, < 262144). A snapshot length of 65535 should be sufficient, on most if not all networks,
+			 * to capture all the data available from the packet.
+			*/
+			DeviceConfiguration(DeviceMode mode = Promiscuous, int packetBufferTimeoutMs = 0, int packetBufferSize = 0,
+				                PcapDirection direction = PCPP_INOUT, int snapshotLength = 0)
 			{
 				this->mode = mode;
 				this->packetBufferTimeoutMs = packetBufferTimeoutMs;
 				this->packetBufferSize = packetBufferSize;
-				this->direction = PCPP_INOUT;
+				this->direction = direction;
+				this->snapshotLength = snapshotLength;
 			}
 		};
 
@@ -220,7 +236,7 @@ namespace pcpp
 		virtual ~PcapLiveDevice();
 
 		/**
-		 * @return The type of the device (libPcap, WinPcap or a remote device)
+		 * @return The type of the device (libPcap, WinPcap/Npcap or a remote device)
 		 */
 		virtual LiveDeviceType getDeviceType() const { return LibPcapDevice; }
 
@@ -242,7 +258,7 @@ namespace pcpp
 		/**
 		 * @return The device's maximum transmission unit (MTU) in bytes
 		 */
-		virtual uint16_t getMtu() const { return m_DeviceMtu; }
+		virtual uint32_t getMtu() const { return m_DeviceMtu; }
 
 		/**
 		 * @return The device's link layer type
@@ -392,7 +408,7 @@ namespace pcpp
 		 * - Device is not opened
 		 * - Packet length is 0
 		 * - Packet length is larger than device MTU
-		 * - Packet could not be sent due to some error in libpcap/WinPcap
+		 * - Packet could not be sent due to some error in libpcap/WinPcap/Npcap
 		 */
 		bool sendPacket(RawPacket const& rawPacket);
 
@@ -404,7 +420,7 @@ namespace pcpp
 		 * - Device is not opened
 		 * - Packet length is 0
 		 * - Packet length is larger than device MTU
-		 * - Packet could not be sent due to some error in libpcap/WinPcap
+		 * - Packet could not be sent due to some error in libpcap/WinPcap/Npcap
 		 */
 		bool sendPacket(const uint8_t* packetData, int packetDataLength);
 
@@ -415,7 +431,7 @@ namespace pcpp
 		 * - Device is not opened
 		 * - Packet length is 0
 		 * - Packet length is larger than device MTU
-		 * - Packet could not be sent due to some error in libpcap/WinPcap
+		 * - Packet could not be sent due to some error in libpcap/WinPcap/Npcap
 		 */
 		bool sendPacket(Packet* packet);
 
@@ -428,7 +444,7 @@ namespace pcpp
 		 * - Device is not opened. In this case no packets will be sent, return value will be 0
 		 * - Packet length is 0
 		 * - Packet length is larger than device MTU
-		 * - Packet could not be sent due to some error in libpcap/WinPcap
+		 * - Packet could not be sent due to some error in libpcap/WinPcap/Npcap
 		 */
 		virtual int sendPackets(RawPacket* rawPacketsArr, int arrLength);
 
@@ -441,7 +457,7 @@ namespace pcpp
 		 * - Device is not opened. In this case no packets will be sent, return value will be 0
 		 * - Packet length is 0
 		 * - Packet length is larger than device MTU
-		 * - Packet could not be sent due to some error in libpcap/WinPcap
+		 * - Packet could not be sent due to some error in libpcap/WinPcap/Npcap
 		 */
 		virtual int sendPackets(Packet** packetsArr, int arrLength);
 
@@ -453,7 +469,7 @@ namespace pcpp
 		 * - Device is not opened. In this case no packets will be sent, return value will be 0
 		 * - Packet length is 0
 		 * - Packet length is larger than device MTU
-		 * - Packet could not be sent due to some error in libpcap/WinPcap
+		 * - Packet could not be sent due to some error in libpcap/WinPcap/Npcap
 		 */
 		virtual int sendPackets(const RawPacketVector& rawPackets);
 

@@ -166,7 +166,7 @@ namespace pcpp
 		PcapNgFileReaderDevice(const PcapNgFileReaderDevice& other);
 		PcapNgFileReaderDevice& operator=(const PcapNgFileReaderDevice& other);
 
-		bool matchPacketWithFilter(const uint8_t* packetData, size_t packetLen, timeval packetTimestamp, uint16_t linkType);
+		bool matchPacketWithFilter(const uint8_t* packetData, size_t packetLen, timespec packetTimestamp, uint16_t linkType);
 
 	public:
 		/**
@@ -320,7 +320,7 @@ namespace pcpp
 		/**
 		 * A destructor for this class
 		 */
-		~PcapFileWriterDevice();
+		~PcapFileWriterDevice() {}
 
 		/**
 		 * Write a RawPacket to the file. Before using this method please verify the file is opened using open(). This method won't change the
@@ -369,6 +369,11 @@ namespace pcpp
 		virtual void close();
 
 		/**
+		 * Flush packets to disk.
+		 */
+		void flush();
+
+		/**
 		 * Get statistics of packets written so far. In the pcap_stat struct, only ps_recv member is relevant. The rest of the members will contain 0
 		 * @param[out] stats The stats struct where stats are returned
 		 */
@@ -397,7 +402,7 @@ namespace pcpp
 		PcapNgFileWriterDevice(const PcapFileWriterDevice& other);
 		PcapNgFileWriterDevice& operator=(const PcapNgFileWriterDevice& other);
 
-		bool matchPacketWithFilter(const uint8_t* packetData, size_t packetLen, timeval packetTimestamp, uint16_t linkType);
+		bool matchPacketWithFilter(const uint8_t* packetData, size_t packetLen, timespec packetTimestamp, uint16_t linkType);
 
 	public:
 
@@ -480,7 +485,12 @@ namespace pcpp
 		bool open(bool appendMode);
 
 		/**
-		 * Flush and close the pacp-ng file
+		 * Flush packets to the pcap-ng file
+		 */
+		void flush();
+
+		/**
+		 * Flush and close the pcap-ng file
 		 */
 		void close();
 
