@@ -34,36 +34,6 @@ void getRules(string filePath)
 	infile.close();
 }
 
-void setupIptables()
-{
-	for (auto &rule : Rules)
-	{
-		if (rule.action.compare("drop") == 0)
-		{
-			char *protocol = new char[rule.protocol.length() + 1];
-			strcpy(protocol, rule.protocol.c_str());
-			char *srcIp = new char[rule.srcIp.length() + 1];
-			strcpy(srcIp, rule.srcIp.c_str());
-			char *dstIp = new char[rule.dstIp.length() + 1];
-			strcpy(dstIp, rule.dstIp.c_str());
-			char *srcPort = new char[rule.srcPort.length() + 1];
-			strcpy(srcPort, rule.srcPort.c_str());
-			char *dstPort = new char[rule.dstPort.length() + 1];
-			strcpy(dstPort, rule.dstPort.c_str());
-
-			char *cmd = "iptables";
-			char *args[] = {cmd, "-I", "INPUT", "-p", protocol, "-s", srcIp, "-d", dstIp, "-j", "DROP", NULL};
-
-			int pid = fork();
-			if (pid == 0)
-			{
-				std::cout << "<debug 1>" << endl;
-				execvp(cmd, args);
-			}
-		}
-	}
-}
-
 void printDeviceInfo(pcpp::PcapLiveDevice *dev)
 {
 	std::cout << "Interface info:" << endl;
@@ -130,7 +100,7 @@ static void onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, 
 			//printHttpLayer(parsedPacket);
 			break;
 		case pcpp::SSL:
-			applicationProtocol = "HTTP";
+			applicationProtocol = "SSL";
 			//printSSLLayer(parsedPacket);
 			break;
 			// default:
@@ -140,14 +110,6 @@ static void onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, 
 			break;
 		}
 	}
-	std::cout << endl;
-	// std::cout << "Scr MAC: " << srcMac.c_str() << endl;
-	// std::cout << "Dst MAC: " << dstMac.c_str() << endl;
-	std::cout << "Network Protocol: " << networkProtocol.c_str() << endl;
-	std::cout << "Transport Protocol: " << transportProtocol.c_str() << endl;
-	std::cout << "Application Protocol: " << applicationProtocol.c_str() << endl;
-	std::cout << "Scr IP: " << srcIP.c_str() << ":" << srcPort << endl;
-	std::cout << "Dst IP: " << dstIP.c_str() << ":" << dstPort << endl;
 
 	for (auto &rule : Rules)
 	{
@@ -163,6 +125,15 @@ static void onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, 
 			break;
 		}
 	}
+
+	std::cout << endl;
+	// std::cout << "Scr MAC: " << srcMac.c_str() << endl;
+	// std::cout << "Dst MAC: " << dstMac.c_str() << endl;
+	std::cout << "Network Protocol: " << networkProtocol.c_str() << endl;
+	std::cout << "Transport Protocol: " << transportProtocol.c_str() << endl;
+	std::cout << "Application Protocol: " << applicationProtocol.c_str() << endl;
+	std::cout << "Source: " << srcIP.c_str() << ":" << srcPort << endl;
+	std::cout << "Destination: " << dstIP.c_str() << ":" << dstPort << endl;
 	std::cout << "Action: " << action << endl;
 
 	std::cout << endl;
@@ -172,48 +143,43 @@ int main(int argc, char *argv[])
 {
 	string filePath = "/home/chutichnuoc/ppp_ids/rules/test.rules";
 	getRules(filePath);
-	setupIptables();
 
-	std::cout << "List devices:" << endl
-			  << endl;
-	for (int i = 0; i < PcapLiveDeviceList::getInstance().getPcapLiveDevicesList().size(); i++)
+	std::cout << "List devices:" << endl;
+	std::cout << endl;
+
+	auto deviceList = PcapLiveDeviceList::getInstance().getPcapLiveDevicesList();
+	for (auto &device : deviceList)
 	{
-		std::cout << "Device no " << i + 1 << " " << PcapLiveDeviceList::getInstance().getPcapLiveDevicesList()[i]->getName() << endl;
+		std::cout << "Device " << device->getName() << " " << device->getIPv4Address().toString().c_str() << endl;
 	}
-	int deviceNo = 1;
-	std::cout << endl
-			  << "Choose a divece to capture: ";
-	cin >> deviceNo;
-	PcapLiveDevice *dev = PcapLiveDeviceList::getInstance().getPcapLiveDevicesList()[deviceNo - 1];
 
-	if (dev == NULL)
+	int deviceNo = 1;
+	std::cout << endl;
+	std::cout << "Choose a divece to capture: ";
+	cin >> deviceNo;
+	PcapLiveDevice *device = deviceList[deviceNo - 1];
+
+	if (device == NULL)
 	{
-		std::cout << "Cannot find interface with name of '" << PcapLiveDeviceList::getInstance().getPcapLiveDevicesList()[deviceNo - 1]->getName() << "'" << endl;
+		std::cout << "Cannot find interface with name of '" << deviceList[deviceNo - 1]->getName() << "'" << endl;
 		exit(1);
 	}
 
-	printDeviceInfo(dev);
+	printDeviceInfo(device);
 
-	if (!dev->open())
+	if (!device->open())
 	{
 		std::cout << "Cannot open device" << endl;
 		exit(1);
 	}
 
-	std::cout << endl
-			  << "Starting async capture..." << endl;
+	std::cout << endl;
+	std::cout << "Starting async capture..." << endl;
 
-	// start capture in async mode. Give a callback function to call to whenever a packet is captured and the stats object as the cookie
-	dev->startCapture(onPacketArrives, 0);
-
-	// sleep for 5 seconds in main thread, in the meantime packets are captured in the async thread
+	device->startCapture(onPacketArrives, 0);
 	PCAP_SLEEP(5);
-
-	// stop capturing packets
-	dev->stopCapture();
-
-	// close the device before application ends
-	dev->close();
+	device->stopCapture();
+	device->close();
 
 	std::cout << "Done!" << endl;
 }
