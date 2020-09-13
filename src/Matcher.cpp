@@ -32,7 +32,7 @@ bool matchIp(string ruleIp, string packetIp)
 	if (slashIndex != string::npos)
 	{
 		subnet = true;
-		string mask = ruleIp.substr(slashIndex + 1, ruleIp.length() - 1);
+		string mask = ruleIp.substr(slashIndex + 1);
 		netmask = static_cast<uint32_t>(stoul(mask));
 		end = slashIndex - 1;
 	}
