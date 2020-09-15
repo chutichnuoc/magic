@@ -21,6 +21,7 @@ public:
 
     clock_t startTime;
     int packetCount = 0;
+    bool matchPacketCount = true;
 
     RuleHeader(std::string action, std::string protocol, std::string srcIp, std::string srcPort, std::string dstIp, std::string dstPort)
     {

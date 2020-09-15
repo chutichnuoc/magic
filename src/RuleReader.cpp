@@ -32,6 +32,7 @@ std::vector<RuleHeader> getRules(std::string filePath)
             {
                 std::string count = getOptionValueByKey(option, "count");
                 rule.count = std::stoi(count);
+                rule.matchPacketCount = false;
             }
         }
         rules.push_back(rule);

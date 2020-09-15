@@ -8,9 +8,6 @@
 #include <sys/wait.h>
 #include "ActionTaker.h"
 
-using namespace std;
-using namespace pcpp;
-
 vector<RuleHeader> Rules;
 
 void printDeviceInfo(pcpp::PcapLiveDevice *dev)
@@ -42,7 +39,7 @@ int main(int argc, char *argv[])
 	std::cout << "List devices:" << endl;
 	std::cout << endl;
 
-	auto deviceList = PcapLiveDeviceList::getInstance().getPcapLiveDevicesList();
+	auto deviceList = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDevicesList();
 	for (auto &device : deviceList)
 	{
 		std::cout << "Device " << device->getName() << " " << device->getIPv4Address().toString().c_str() << endl;
@@ -52,7 +49,7 @@ int main(int argc, char *argv[])
 	std::cout << endl;
 	std::cout << "Choose a divece to capture: ";
 	cin >> deviceNo;
-	PcapLiveDevice *device = deviceList[deviceNo - 1];
+	pcpp::PcapLiveDevice *device = deviceList[deviceNo - 1];
 
 	if (device == NULL)
 	{

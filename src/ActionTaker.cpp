@@ -1,4 +1,5 @@
 #include "ActionTaker.h"
+#include "Logger.h"
 
 void takeAction(pcpp::Packet parsedPacket, std::vector<RuleHeader> &rules)
 {
@@ -70,7 +71,7 @@ void takeAction(pcpp::Packet parsedPacket, std::vector<RuleHeader> &rules)
             matchPort(rule.srcPort, to_string(srcPort)) &&
             matchPort(rule.dstPort, to_string(dstPort)))
         {
-            if (rule.count == 0)
+            if (rule.count == 0 || rule.matchPacketCount)
             {
                 action = rule.action;
                 break;
@@ -80,12 +81,14 @@ void takeAction(pcpp::Packet parsedPacket, std::vector<RuleHeader> &rules)
                     rule.startTime = clock();
                 }
                 rule.packetCount++;
-                std::cout << "here " << rule.packetCount << std::endl;
                 if (rule.packetCount >= rule.count) {
                     clock_t endTime = clock();
                     double passedTime = double(endTime - rule.startTime) / double(CLOCKS_PER_SEC);
                     if (passedTime <= (double) rule.time) {
-                        std::cout << "ddos" << std::endl;
+                        rule.matchPacketCount = true;
+                    }
+                    else {
+                        rule.packetCount = 0;
                     }
                 }
             }
@@ -104,4 +107,9 @@ void takeAction(pcpp::Packet parsedPacket, std::vector<RuleHeader> &rules)
     // std::cout << "Size: " << packet->getRawDataLen() << std::endl;
 
     std::cout << std::endl;
+
+    if (action.compare("alert") == 0) {
+        std::string twodot = ":";
+        logPacketInfo(srcIP.c_str() + twodot + std::to_string(srcPort) + " -> " + dstIP.c_str() + twodot + std::to_string(dstPort));
+    }
 }

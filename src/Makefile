@@ -7,7 +7,8 @@ all:
 	g++ $(PCAPPP_INCLUDES) -c -o Matcher.o Matcher.cpp
 	g++ $(PCAPPP_INCLUDES) -c -o RuleReader.o RuleReader.cpp
 	g++ $(PCAPPP_INCLUDES) -c -o ActionTaker.o ActionTaker.cpp
-	g++ $(PCAPPP_LIBS_DIR) -o Main Main.o Parser.o Matcher.o RuleReader.o ActionTaker.o $(PCAPPP_LIBS)
+	g++ $(PCAPPP_INCLUDES) -c -o Logger.o Logger.cpp
+	g++ $(PCAPPP_LIBS_DIR) -o Main Main.o Parser.o Matcher.o RuleReader.o ActionTaker.o Logger.o $(PCAPPP_LIBS)
 
 # Clean Target
 clean:
