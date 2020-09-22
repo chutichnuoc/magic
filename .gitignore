@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+# lib file
+!libCommon++.a
+!libPacket++.a
+!libPcap++.a
