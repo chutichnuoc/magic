@@ -6,7 +6,9 @@
 #include <iostream>
 #include "Parser.h"
 #include "Matcher.h"
+#include "Logger.h"
+#include "IptablesSetup.h"
 
-void takeAction(pcpp::Packet parsedPacket, std::vector<RuleHeader> &rules);
+void takeAction(pcpp::Packet parsedPacket, std::vector<RuleHeader> &rules, int mode);
 
 #endif

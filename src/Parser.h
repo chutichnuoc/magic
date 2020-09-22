@@ -18,9 +18,5 @@ void parseIpv4Layer(pcpp::Packet parsedPacket, std::string *srcIP, std::string *
 void printIcmpLayer(pcpp::Packet parsedPacket);
 void parseTcpLayer(pcpp::Packet parsedPacket, int *srcPort, int *dstPort);
 void parseUdpLayer(pcpp::Packet parsedPacket, int *srcPort, int *dstPort);
-void printHttpLayer(pcpp::Packet parsedPacket);
-void printSSLLayer(pcpp::Packet parsedPacket);
-std::string printHttpMethod(pcpp::HttpRequestLayer::HttpMethod httpMethod);
-void printPayload(pcpp::Packet parsedPacket);
 
 #endif

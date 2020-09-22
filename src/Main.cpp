@@ -1,14 +1,25 @@
 #include "stdlib.h"
 #include "PcapLiveDeviceList.h"
-#include "PlatformSpecificUtils.h"
 #include "PcapFileDevice.h"
 #include <iostream>
+#include <bits/stdc++.h>
 #include "RuleHeader.h"
 #include "RuleReader.h"
 #include <sys/wait.h>
 #include "ActionTaker.h"
+#include "IptablesSetup.h"
 
 vector<RuleHeader> Rules;
+int mode = 1;
+
+void setupIptables()
+{
+	clearIptables();
+	for (auto &rule : Rules)
+	{
+		addRuleToIptables(rule);
+	}
+}
 
 void printDeviceInfo(pcpp::PcapLiveDevice *dev)
 {
@@ -28,13 +39,28 @@ static void onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, 
 {
 	// parsed the raw packet
 	pcpp::Packet parsedPacket(packet);
-	takeAction(packet, Rules);
+	takeAction(packet, Rules, mode);
 }
 
 int main(int argc, char *argv[])
 {
 	string filePath = "/home/chutichnuoc/ppp_ids/rules/test.rules";
 	Rules = getRules(filePath);
+
+	std::cout << "Choose mode: " << endl;
+	std::cout << "1. IDS" << endl;
+	std::cout << "2. IPS" << endl;
+	std::cout << endl;
+
+	std::cout << "Choose mode: ";
+	cin >> mode;
+	if (mode == 1)
+	{
+	}
+	else if (mode == 2)
+	{
+		setupIptables();
+	}
 
 	std::cout << "List devices:" << endl;
 	std::cout << endl;
@@ -69,7 +95,7 @@ int main(int argc, char *argv[])
 	std::cout << "Starting async capture..." << endl;
 
 	device->startCapture(onPacketArrives, 0);
-	PCAP_SLEEP(5);
+	PCAP_SLEEP(-1);
 	device->stopCapture();
 	device->close();
 

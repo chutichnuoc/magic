@@ -1,3 +1,5 @@
-alert icmp any any -> 192.168.22.103 any (size: 20; time: 4; count: 3;)
+drop icmp any any -> any any (size: 20; time: 4; count: 3;)
 pass udp any !1234 -> any 53
 alert ip any any -> any any
+drop tcp 192.168.10.0/24 2030 -> 10.10.10.10 2050
+drop tcp any 2030 -> 10.10.10.10 2050
