@@ -120,7 +120,14 @@ void takeAction(std::string protocol, std::string srcIP, std::string dstIP, int 
     }
     else if (action.compare("drop") == 0 && mode == IPS_MODE)
     {
-        logPacketInfo(srcIP.c_str() + twodot + std::to_string(srcPort) + arrow + dstIP.c_str() + twodot + std::to_string(dstPort) + " (dropped)");
+        if (protocol.compare("ICMP") == 0)
+        {
+            logPacketInfo(srcIP.c_str() + arrow + dstIP.c_str() + " (dropped)");
+        }
+        else
+        {
+            logPacketInfo(srcIP.c_str() + twodot + std::to_string(srcPort) + arrow + dstIP.c_str() + twodot + std::to_string(dstPort) + " (dropped)");
+        }
         std::cout << "Action: " << action << std::endl;
     }
 }

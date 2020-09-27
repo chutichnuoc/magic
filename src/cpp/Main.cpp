@@ -72,6 +72,4 @@ int main(int argc, char *argv[])
 	PCAP_SLEEP(-1);
 	device->stopCapture();
 	device->close();
-
-	std::cout << "Done!" << endl;
 }
