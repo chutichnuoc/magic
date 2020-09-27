@@ -35,3 +35,6 @@
 !libCommon++.a
 !libPacket++.a
 !libPcap++.a
+
+# out folder
+out/
