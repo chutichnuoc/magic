@@ -1,4 +1,39 @@
-include /usr/local/etc/PcapPlusPlus.mk
+
+### COMMON ###
+
+# includes
+PCAPPP_INCLUDES := -I/usr/local/include/pcapplusplus
+
+
+# libs
+PCAPPP_LIBS := -lPcap++ -lPacket++ -lCommon++
+
+# post build
+PCAPPP_POST_BUILD :=
+
+# build flags
+PCAPPP_BUILD_FLAGS :=
+
+ifdef PCAPPP_ENABLE_CPP_FEATURE_DETECTION
+	PCAPPP_BUILD_FLAGS += -DPCAPPP_CPP_FEATURE_DETECTION -std=c++11
+endif
+
+ifndef CXXFLAGS
+CXXFLAGS := -O2 -g -Wall
+endif
+
+PCAPPP_BUILD_FLAGS += $(CXXFLAGS)
+### LINUX ###
+
+# includes
+PCAPPP_INCLUDES += -I/usr/include/netinet
+
+# libs
+PCAPPP_LIBS += -lpcap -lpthread
+
+# allow user to add custom LDFLAGS
+PCAPPP_BUILD_FLAGS += $(LDFLAGS)
+
 
 # All Target
 all:

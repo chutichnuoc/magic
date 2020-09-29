@@ -62,7 +62,9 @@ void handlePacket(pcpp::Packet parsedPacket, std::vector<RuleHeader> &rules, int
                         rule.matchPacketCount = true;
                         if (mode == IPS_MODE)
                         {
-                            addRuleToIptables(rule);
+                            addRuleToIptables(rule, "INPUT");
+                            addRuleToIptables(rule, "OUTPUT");
+                            addRuleToIptables(rule, "FORWARD");
                         }
                     }
                     else
@@ -92,7 +94,8 @@ void takeAction(std::string protocol, std::string srcIP, std::string dstIP, int 
 {
     std::string twodot = ":";
     std::string arrow = " -> ";
-    std::cout << std::endl << "Protocol: " << protocol.c_str() << std::endl;
+    std::cout << std::endl
+              << "Protocol: " << protocol.c_str() << std::endl;
     if (protocol.compare("ICMP") == 0)
     {
         std::cout << srcIP.c_str() << " -> " << dstIP.c_str() << std::endl;

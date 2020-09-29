@@ -9,7 +9,7 @@
 #include <vector>
 
 void clearIptables();
-void addRuleToIptables(RuleHeader rule);
+void addRuleToIptables(RuleHeader rule, char *flow);
 void setupIptables(std::vector<RuleHeader> rules);
 
 #endif

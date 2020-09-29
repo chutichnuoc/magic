@@ -12,7 +12,7 @@ void clearIptables()
 	}
 }
 
-void addRuleToIptables(RuleHeader rule)
+void addRuleToIptables(RuleHeader rule, char *flow)
 {
 	if (rule.action.compare("drop") == 0 && (rule.count == 0 || rule.matchPacketCount))
 	{
@@ -40,7 +40,6 @@ void addRuleToIptables(RuleHeader rule)
 		strcpy(srcPort, rule.srcPort.c_str());
 		char *dstPort = new char[6];
 		strcpy(dstPort, rule.dstPort.c_str());
-		char *flow = "FORWARD";
 
 		if (rule.srcPort.compare("any") == 0 && rule.dstPort.compare("any") == 0)
 		{
@@ -90,6 +89,8 @@ void setupIptables(std::vector<RuleHeader> rules)
 	clearIptables();
 	for (auto &rule : rules)
 	{
-		addRuleToIptables(rule);
+		addRuleToIptables(rule, "INPUT");
+		addRuleToIptables(rule, "OUTPUT");
+		addRuleToIptables(rule, "FORWARD");
 	}
 }
