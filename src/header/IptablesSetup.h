@@ -8,8 +8,10 @@
 #include "RuleHeader.h"
 #include <vector>
 
+void backupIptalbes();
+void restoreIptalbes();
 void clearIptables();
-void addRuleToIptables(RuleHeader rule, char *flow);
+void addRuleToIptables(RuleHeader rule, std::string flow);
 void setupIptables(std::vector<RuleHeader> rules);
 
 #endif

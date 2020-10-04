@@ -1,91 +1,71 @@
 #include "../header/IptablesSetup.h"
 
-void clearIptables()
+void backupIptalbes()
 {
-	char *cmd = "iptables";
-	char *args[] = {cmd, "-F", NULL};
-
-	int pid = fork();
-	if (pid == 0)
-	{
-		execvp(cmd, args);
-	}
+	system("iptables-save > /home/chutichnuoc/rules.v4");
 }
 
-void addRuleToIptables(RuleHeader rule, char *flow)
+void restoreIptalbes()
+{
+	system("iptables-restore < /home/chutichnuoc/rules.v4");
+}
+
+void clearIptables()
+{
+	system("iptables -F");
+}
+
+void addRuleToIptables(RuleHeader rule, std::string flow)
 {
 	if (rule.action.compare("drop") == 0 && (rule.count == 0 || rule.matchPacketCount))
 	{
-		char *protocol = new char[rule.protocol.length() + 1];
-		strcpy(protocol, rule.protocol.c_str());
-		char *srcIp = new char[20];
+		std::string protocol = "";
+		std::string srcIp = "";
+		std::string dstIp = "";
+		std::string action = "DROP";
+		std::string command = "iptables -I " + flow;
+		if (rule.protocol.compare("ip") == 0)
+		{
+			protocol = "all";
+		}
+		else
+		{
+			protocol = rule.protocol;
+		}
+		command += " -p " + protocol;
 		if (rule.srcIp.compare("any") == 0)
 		{
-			strcpy(srcIp, "0.0.0.0/0");
+			srcIp = "0.0.0.0/0";
 		}
 		else
 		{
-			strcpy(srcIp, rule.srcIp.c_str());
+			srcIp = rule.srcIp;
 		}
-		char *dstIp = new char[20];
 		if (rule.dstIp.compare("any") == 0)
 		{
-			strcpy(dstIp, "0.0.0.0/0");
+			dstIp = "0.0.0.0/0";
 		}
 		else
 		{
-			strcpy(dstIp, rule.dstIp.c_str());
+			dstIp = rule.dstIp;
 		}
-		char *srcPort = new char[6];
-		strcpy(srcPort, rule.srcPort.c_str());
-		char *dstPort = new char[6];
-		strcpy(dstPort, rule.dstPort.c_str());
-
-		if (rule.srcPort.compare("any") == 0 && rule.dstPort.compare("any") == 0)
+		command += " -s " + srcIp + " -d " + dstIp;
+		if (rule.srcPort.compare("any") != 0)
 		{
-			char *cmd = "iptables";
-			char *args[] = {cmd, "-I", flow, "-p", protocol, "-s", srcIp, "-d", dstIp, "-j", "DROP", NULL};
-			int pid = fork();
-			if (pid == 0)
-			{
-				execvp(cmd, args);
-			}
+			command += " --sport " + rule.srcPort;
 		}
-		else if (rule.srcPort.compare("any") != 0 && rule.dstPort.compare("any") != 0)
+		if (rule.dstPort.compare("any") != 0)
 		{
-			char *cmd = "iptables";
-			char *args[] = {cmd, "-I", flow, "-p", protocol, "-s", srcIp, "-d", dstIp, "--sport", srcPort, "--dport", dstPort, "-j", "DROP", NULL};
-			int pid = fork();
-			if (pid == 0)
-			{
-				execvp(cmd, args);
-			}
+			command += " --dport "  + rule.dstPort;
 		}
-		else if (rule.srcPort.compare("any") == 0 && rule.dstPort.compare("any") != 0)
-		{
-			char *cmd = "iptables";
-			char *args[] = {cmd, "-I", flow, "-p", protocol, "-s", srcIp, "-d", dstIp, "--dport", dstPort, "-j", "DROP", NULL};
-			int pid = fork();
-			if (pid == 0)
-			{
-				execvp(cmd, args);
-			}
-		}
-		else if (rule.srcPort.compare("any") != 0 && rule.dstPort.compare("any") == 0)
-		{
-			char *cmd = "iptables";
-			char *args[] = {cmd, "-I", flow, "-p", protocol, "-s", srcIp, "-d", dstIp, "--sport", srcPort, "-j", "DROP", NULL};
-			int pid = fork();
-			if (pid == 0)
-			{
-				execvp(cmd, args);
-			}
-		}
+		command += " -j " + action;
+		system(command.c_str());
 	}
 }
 
 void setupIptables(std::vector<RuleHeader> rules)
 {
+	backupIptalbes();
 	clearIptables();
 	for (auto &rule : rules)
 	{
