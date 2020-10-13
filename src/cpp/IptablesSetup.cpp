@@ -71,7 +71,6 @@ void addRuleToIptables(RuleHeader rule, std::string flow)
 void setupIptables(std::vector<RuleHeader> rules)
 {
 	backupIptalbes();
-	clearIptables();
 	for (auto &rule : rules)
 	{
 		addRuleToIptables(rule, "INPUT");
