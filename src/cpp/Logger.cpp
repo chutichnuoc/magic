@@ -1,5 +1,14 @@
 #include "../header/Logger.h"
 
+void getCurrentDir()
+{
+    char cwd[1024];
+    chdir("/path/to/change/directory/to");
+    getcwd(cwd, sizeof(cwd));
+    std::string dir(cwd);
+    std::cout << "Current working dir: " << dir << std::endl;
+}
+
 void logPacketInfo(std::string message)
 {
     time_t rawtime;
@@ -12,8 +21,12 @@ void logPacketInfo(std::string message)
     strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
     std::string currTime(buffer);
 
+    // getCurrentDir();
+
     std::ofstream myfile;
-    myfile.open("/home/chutichnuoc/ppp_ids/src/out/log.txt", std::ios_base::app);
+
+    std::string logFile = getConfigValue("logFile");
+    myfile.open(logFile, std::ios_base::app);
     myfile << currTime << "\t\t" << message << std::endl;
     myfile.close();
 }

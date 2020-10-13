@@ -44,9 +44,9 @@ all:
 	g++ $(PCAPPP_INCLUDES) -c -o out/ActionTaker.o cpp/ActionTaker.cpp
 	g++ $(PCAPPP_INCLUDES) -c -o out/Logger.o cpp/Logger.cpp
 	g++ $(PCAPPP_INCLUDES) -c -o out/IptablesSetup.o cpp/IptablesSetup.cpp
-	g++ $(PCAPPP_LIBS_DIR) -o out/Main out/Main.o out/Parser.o out/Matcher.o out/RuleReader.o out/ActionTaker.o out/Logger.o out/IptablesSetup.o $(PCAPPP_LIBS)
+	g++ $(PCAPPP_INCLUDES) -c -o out/ConfigReader.o cpp/ConfigReader.cpp
+	g++ $(PCAPPP_LIBS_DIR) -o out/Main out/Main.o out/Parser.o out/Matcher.o out/RuleReader.o out/ActionTaker.o out/Logger.o out/IptablesSetup.o out/ConfigReader.o $(PCAPPP_LIBS)
 
 # Clean Target
 clean:
-	rm Main out/Main.o out/Parser.o out/Matcher.o out/RuleReader.o out/ActionTaker.o out/Logger.o out/IptablesSetup.o
-	rm out/Main
+	rm out/Main out/Main.o out/Parser.o out/Matcher.o out/RuleReader.o out/ActionTaker.o out/Logger.o out/IptablesSetup.o out/ConfigReader.o

@@ -10,6 +10,7 @@
 #include "../header/RuleReader.h"
 #include "../header/ActionTaker.h"
 #include "../header/IptablesSetup.h"
+#include "../header/ConfigReader.h"
 
 vector<RuleHeader> rules;
 int mode = IDS_MODE;
@@ -59,7 +60,7 @@ static int getRunningMode()
 int main(int argc, char *argv[])
 {
 	signal(SIGINT, handle_sigint);
-	string filePath = "/home/chutichnuoc/ppp_ids/rules/test.rules";
+	string filePath = getConfigValue("ruleFile");
 	rules = getRules(filePath);
 
 	mode = getRunningMode();

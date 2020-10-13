@@ -2,17 +2,22 @@
 
 void backupIptalbes()
 {
-	system("iptables-save > /home/chutichnuoc/rules.v4");
+	std::string iptablesFile = getConfigValue("iptablesFile");
+	std::string command = "iptables-save > " + iptablesFile;
+	system(command.c_str());
 }
 
 void restoreIptalbes()
 {
-	system("iptables-restore < /home/chutichnuoc/rules.v4");
+	std::string iptablesFile = getConfigValue("iptablesFile");
+	std::string command = "iptables-restore < " + iptablesFile;
+	system(command.c_str());
 }
 
 void clearIptables()
 {
-	system("iptables -F");
+	std::string command = "iptables -F";
+	system(command.c_str());
 }
 
 void addRuleToIptables(RuleHeader rule, std::string flow)

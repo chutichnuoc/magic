@@ -3,8 +3,11 @@
 
 #include <iostream>
 #include <fstream>
-#include <ctime>  
+#include <ctime>
+#include <unistd.h>
+#include "../header/ConfigReader.h"
 
+void getCurrentDir();
 void logPacketInfo(std::string message);
 
 #endif

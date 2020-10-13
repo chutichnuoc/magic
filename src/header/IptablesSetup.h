@@ -7,6 +7,7 @@
 #include <bits/stdc++.h>
 #include "RuleHeader.h"
 #include <vector>
+#include "../header/ConfigReader.h"
 
 void backupIptalbes();
 void restoreIptalbes();
