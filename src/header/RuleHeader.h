@@ -33,8 +33,9 @@ public:
         this->dstPort = dstPort;
     }
 
-    void toString() {
-        std::cout << this->action << " "  << this->protocol << " "  << this->srcIp << " "  << this->srcPort << " -> " << this->dstIp << " " << this->dstPort << std::endl;
+    void toString()
+    {
+        std::cout << this->action << " " << this->protocol << " " << this->srcIp << " " << this->srcPort << " -> " << this->dstIp << " " << this->dstPort << std::endl;
         std::cout << this->size << " " << this->time << " " << this->count << std::endl;
     }
 };

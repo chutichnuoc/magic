@@ -2,7 +2,7 @@
 
 bool matchProtocol(string ruleProtocol, string packetProtocol)
 {
-	transform(ruleProtocol.begin(), ruleProtocol.end(), ruleProtocol.begin(), ::toupper); 
+	transform(ruleProtocol.begin(), ruleProtocol.end(), ruleProtocol.begin(), ::toupper);
 	return ruleProtocol.compare(packetProtocol) == 0;
 }
 

@@ -2,7 +2,7 @@
 #define RULE_READER_H
 
 #include <iostream>
-#include <vector> 
+#include <vector>
 #include <fstream>
 #include <sstream>
 #include "RuleHeader.h"

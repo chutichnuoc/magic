@@ -61,7 +61,7 @@ void addRuleToIptables(RuleHeader rule, std::string flow)
 		}
 		if (rule.dstPort.compare("any") != 0)
 		{
-			command += " --dport "  + rule.dstPort;
+			command += " --dport " + rule.dstPort;
 		}
 		command += " -j " + action;
 		system(command.c_str());
