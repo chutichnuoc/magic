@@ -1,10 +1,15 @@
 #include "../header/ConfigReader.h"
 
+static std::string configFilePath;
+
+void setConfigFilePath(std::string path)
+{
+    configFilePath = path;
+}
+
 std::string getConfigValue(std::string key)
 {
-    const std::string filePath = "/home/chutichnuoc/ppp_ids/config/config.ini";
-
-    std::ifstream infile(filePath);
+    std::ifstream infile(configFilePath);
     std::string line;
     while (getline(infile, line))
     {
