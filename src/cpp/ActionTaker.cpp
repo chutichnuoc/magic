@@ -1,49 +1,45 @@
 #include "../header/ActionTaker.h"
 
-void handlePacket(pcpp::Packet parsedPacket, std::vector<RuleHeader> &rules, int mode)
+// void log() {
+//         std::string twodot = ":";
+//     std::string arrow = " -> ";
+//     std::cout << std::endl
+//               << "Protocol: " << protocol.c_str() << std::endl;
+//     if (protocol.compare("icmp") == 0)
+//     {
+//         std::cout << srcIp << " -> " << dstIp << std::endl;
+//     }
+//     else
+//     {
+//         std::cout << srcIp << ":" << srcPort << " -> " << dstIp << ":" << dstPort << std::endl;
+//     }
+// }
+
+int getAction(std::string protocol, std::string srcIp, std::string srcPort, std::string dstIp, std::string dstPort, std::vector<RuleHeader> &rules, int mode)
 {
-    std::string srcIP("any");
-    std::string dstIP("any");
-    int srcPort = 0;
-    int dstPort = 0;
-    std::string networkProtocol("unknown");
-    std::string transportProtocol("unknown");
-    std::string action("pass");
-
-    for (pcpp::Layer *curLayer = parsedPacket.getFirstLayer(); curLayer != NULL; curLayer = curLayer->getNextLayer())
-    {
-        switch (curLayer->getProtocol())
-        {
-        case pcpp::IPv4:
-            networkProtocol = "IP";
-            parseIpv4Layer(parsedPacket, &srcIP, &dstIP);
-            break;
-        case pcpp::ICMP:
-            networkProtocol = "ICMP";
-            break;
-        case pcpp::TCP:
-            transportProtocol = "TCP";
-            parseTcpLayer(parsedPacket, &srcPort, &dstPort);
-            break;
-        case pcpp::UDP:
-            transportProtocol = "UDP";
-            parseUdpLayer(parsedPacket, &srcPort, &dstPort);
-            break;
-        }
-    }
-
+    int action = 1;
     for (auto &rule : rules)
     {
-        if ((matchProtocol(rule.protocol, networkProtocol.c_str()) ||
-             matchProtocol(rule.protocol, transportProtocol.c_str())) &&
-            matchIp(rule.srcIp, srcIP.c_str()) &&
-            matchIp(rule.dstIp, dstIP.c_str()) &&
-            matchPort(rule.srcPort, to_string(srcPort)) &&
-            matchPort(rule.dstPort, to_string(dstPort)))
+        if ((matchProtocol(rule.protocol, protocol)) &&
+            matchIp(rule.srcIp, srcIp) &&
+            matchIp(rule.dstIp, dstIp) &&
+            matchPort(rule.srcPort, srcPort) &&
+            matchPort(rule.dstPort, dstPort))
         {
             if (rule.count == 0 || rule.matchPacketCount)
             {
-                action = rule.action;
+                if (rule.action.compare("pass") == 0)
+                {
+                    action = 1;
+                }
+                else if (rule.action.compare("alert") == 0)
+                {
+                    action = 2;
+                }
+                else if (rule.action.compare("drop") == 0)
+                {
+                    action = 3;
+                }
                 break;
             }
             else
@@ -62,9 +58,8 @@ void handlePacket(pcpp::Packet parsedPacket, std::vector<RuleHeader> &rules, int
                         rule.matchPacketCount = true;
                         if (mode == IPS_MODE)
                         {
-                            addRuleToIptables(rule, "INPUT");
-                            addRuleToIptables(rule, "OUTPUT");
-                            addRuleToIptables(rule, "FORWARD");
+                            action = 3;
+                            break;
                         }
                     }
                     else
@@ -76,18 +71,7 @@ void handlePacket(pcpp::Packet parsedPacket, std::vector<RuleHeader> &rules, int
         }
     }
 
-    if (networkProtocol.compare("unknown") == 0)
-    {
-        return;
-    }
-    if (networkProtocol.compare("ICMP") == 0)
-    {
-        takeAction(networkProtocol, srcIP, dstIP, srcPort, dstPort, action, mode);
-    }
-    else
-    {
-        takeAction(transportProtocol, srcIP, dstIP, srcPort, dstPort, action, mode);
-    }
+    return action;
 }
 
 void takeAction(std::string protocol, std::string srcIP, std::string dstIP, int srcPort, int dstPort, std::string action, int mode)

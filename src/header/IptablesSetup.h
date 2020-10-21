@@ -12,7 +12,6 @@
 void backupIptalbes();
 void restoreIptalbes();
 void clearIptables();
-void addRuleToIptables(RuleHeader rule, std::string flow);
-void setupIptables(std::vector<RuleHeader> rules);
+void setupIptables(std::string interface);
 
 #endif

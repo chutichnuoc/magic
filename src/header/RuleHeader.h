@@ -15,7 +15,6 @@ public:
     std::string dstIp;
     std::string dstPort;
 
-    int size = 0;
     int time = 0;
     int count = 0;
 
@@ -36,7 +35,7 @@ public:
     void toString()
     {
         std::cout << this->action << " " << this->protocol << " " << this->srcIp << " " << this->srcPort << " -> " << this->dstIp << " " << this->dstPort << std::endl;
-        std::cout << this->size << " " << this->time << " " << this->count << std::endl;
+        std::cout << this->time << " " << this->count << std::endl;
     }
 };
 

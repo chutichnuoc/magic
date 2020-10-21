@@ -18,11 +18,6 @@ std::vector<RuleHeader> getRules(std::string filePath)
         if (line.find('(') != std::string::npos && line.find(')') != std::string::npos)
         {
             std::string option = line.substr(line.find('(') + 1, line.find(')') - line.find('(') - 1);
-            if (option.find("size") != std::string::npos)
-            {
-                std::string size = getOptionValueByKey(option, "size");
-                rule.size = std::stoi(size);
-            }
             if (option.find("time") != std::string::npos)
             {
                 std::string time = getOptionValueByKey(option, "time");
@@ -36,7 +31,6 @@ std::vector<RuleHeader> getRules(std::string filePath)
             }
         }
         rules.push_back(rule);
-        // rule.toString();
     }
     infile.close();
     return rules;

@@ -2,8 +2,9 @@
 
 bool matchProtocol(string ruleProtocol, string packetProtocol)
 {
-	transform(ruleProtocol.begin(), ruleProtocol.end(), ruleProtocol.begin(), ::toupper);
-	return ruleProtocol.compare(packetProtocol) == 0;
+	transform(ruleProtocol.begin(), ruleProtocol.end(), ruleProtocol.begin(), ::tolower);
+	transform(packetProtocol.begin(), packetProtocol.end(), packetProtocol.begin(), ::tolower);
+	return ruleProtocol.compare(packetProtocol) == 0 || packetProtocol.compare("ip") == 0 || ruleProtocol.compare("ip") == 0;
 }
 
 bool matchIp(string ruleIp, string packetIp)
@@ -46,6 +47,7 @@ bool matchIp(string ruleIp, string packetIp)
 
 bool matchPort(string rulePort, string packetPort)
 {
+	std::cout << rulePort << " " << packetPort << std::endl;
 	if (rulePort.compare("any") == 0 || rulePort.compare("any\n") == 0 || packetPort.compare("any") == 0 || rulePort.compare(packetPort) == 0)
 	{
 		return true;

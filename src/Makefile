@@ -29,7 +29,7 @@ PCAPPP_BUILD_FLAGS += $(CXXFLAGS)
 PCAPPP_INCLUDES += -I/usr/include/netinet
 
 # libs
-PCAPPP_LIBS += -lpcap -lpthread
+PCAPPP_LIBS += -lpcap -lpthread -lnetfilter_queue
 
 # allow user to add custom LDFLAGS
 PCAPPP_BUILD_FLAGS += $(LDFLAGS)
@@ -45,8 +45,9 @@ all:
 	g++ $(PCAPPP_INCLUDES) -c -o out/Logger.o cpp/Logger.cpp
 	g++ $(PCAPPP_INCLUDES) -c -o out/IptablesSetup.o cpp/IptablesSetup.cpp
 	g++ $(PCAPPP_INCLUDES) -c -o out/ConfigReader.o cpp/ConfigReader.cpp
-	g++ $(PCAPPP_LIBS_DIR) -o out/Magic out/Main.o out/Parser.o out/Matcher.o out/RuleReader.o out/ActionTaker.o out/Logger.o out/IptablesSetup.o out/ConfigReader.o $(PCAPPP_LIBS)
+	g++ $(PCAPPP_INCLUDES) -c -o out/ProtocolHandler.o cpp/ProtocolHandler.cpp
+	g++ $(PCAPPP_LIBS_DIR) -o out/Magic out/Main.o out/Parser.o out/Matcher.o out/RuleReader.o out/ActionTaker.o out/Logger.o out/IptablesSetup.o out/ConfigReader.o out/ProtocolHandler.o $(PCAPPP_LIBS)
 
 # Clean Target
 clean:
-	rm out/Magic out/Main.o out/Parser.o out/Matcher.o out/RuleReader.o out/ActionTaker.o out/Logger.o out/IptablesSetup.o out/ConfigReader.o
+	rm out/Magic out/Main.o out/Parser.o out/Matcher.o out/RuleReader.o out/ActionTaker.o out/Logger.o out/IptablesSetup.o out/ConfigReader.o out/ProtocolHandler.o
