@@ -1,8 +1,6 @@
 #ifndef RULE_HEADER
 #define RULE_HEADER
 
-#include <string>
-#include "stdlib.h"
 #include <iostream>
 
 class RuleHeader
@@ -15,12 +13,15 @@ public:
     std::string dst_ip;
     std::string dst_port;
 
+    bool option = false;
+
     int time = 0;
     int count = 0;
+    double cpu_usage = 100;
 
     clock_t start_time;
     int packet_count = 0;
-    bool match_packet_count = true;
+    bool match_packet_count = false;
 
     RuleHeader(std::string action, std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port)
     {
@@ -37,6 +38,7 @@ public:
         std::cout << this->action << " " << this->protocol << " " << this->src_ip << " " << this->src_port << " -> " << this->dst_ip << " " << this->dst_port << std::endl;
         std::cout << this->time << " " << this->count << std::endl;
     }
+
 };
 
 #endif

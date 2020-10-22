@@ -1,10 +1,6 @@
 #define APP_NAME "Magic"
 
-#include "stdlib.h"
 #include <iostream>
-#include <bits/stdc++.h>
-#include <sys/wait.h>
-#include <stdio.h>
 #include <signal.h>
 
 #include <netinet/in.h>
@@ -14,10 +10,11 @@
 
 #include "../header/RuleHeader.h"
 #include "../header/RuleReader.h"
-#include "../header/ActionTaker.h"
+#include "../header/ActionGetter.h"
 #include "../header/IptablesSetup.h"
 #include "../header/ProtocolHandler.h"
 #include "../header/CommonUtil.h"
+#include "../header/Logger.h"
 
 vector<RuleHeader> rules;
 int mode = IDS_MODE;
@@ -64,7 +61,7 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_
 		cout << message << endl;
 		log_packet_info(message);
 	}
-	else if (action == DROP)
+	else if (action == DROP && mode == IPS_MODE)
 	{
 		std::string message = packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, true);
 		cout << message << endl;
@@ -98,7 +95,8 @@ int main(int argc, char *argv[])
 	setup_iptables(interface);
 	string rule_file_path = get_config_value("ruleFile");
 	rules = get_rules(rule_file_path);
-	mode = (running_mode.compare("IPS") == 0) ? IPS_MODE : IDS_MODE;
+	transform(running_mode.begin(), running_mode.end(), running_mode.begin(), ::tolower);
+	mode = (running_mode.compare("ips") == 0) ? IPS_MODE : IDS_MODE;
 
 	struct nfq_handle *h;
 	struct nfq_q_handle *qh;

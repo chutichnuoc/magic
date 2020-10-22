@@ -22,12 +22,19 @@ std::vector<RuleHeader> get_rules(std::string file_path)
             {
                 std::string time = get_option_value_by_key(option, "time");
                 rule.time = std::stoi(time);
+                rule.option = true;
             }
             if (option.find("count") != std::string::npos)
             {
                 std::string count = get_option_value_by_key(option, "count");
                 rule.count = std::stoi(count);
-                rule.match_packet_count = false;
+                rule.option = true;
+            }
+            if (option.find("cpu") != std::string::npos)
+            {
+                std::string cpu = get_option_value_by_key(option, "cpu");
+                rule.cpu_usage = std::stod(cpu);
+                rule.option = true;
             }
         }
         rules.push_back(rule);

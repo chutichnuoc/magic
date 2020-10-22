@@ -9,15 +9,15 @@
 
 using namespace std;
 
-bool matchProtocol(string ruleProtocol, string packetProtocol);
+bool match_protocol(string ruleProtocol, string packetProtocol);
 
-bool matchIp(string ruleIp, string packetIp);
+bool match_ip(string ruleIp, string packetIp);
 
-bool matchPort(string rulePort, string packetPort);
+bool match_port(string rulePort, string packetPort);
 
-uint32_t IPToUInt(string ip);
+uint32_t ip_to_int(string ip);
 
-uint32_t getNetIp(string ruleIp, int start, int end);
+uint32_t get_net_ip(string ruleIp, int start, int end);
 
 bool match_packet(std::string protocol, std::string srcIp, std::string srcPort, std::string dstIp, std::string dstPort, RuleHeader rule);
 
