@@ -1,15 +1,15 @@
 #include "../header/ConfigReader.h"
 
-static std::string configFilePath;
+static std::string config_file_path;
 
-void setConfigFilePath(std::string path)
+void set_config_File_path(std::string path)
 {
-    configFilePath = path;
+    config_file_path = path;
 }
 
-std::string getConfigValue(std::string key)
+std::string get_config_value(std::string key)
 {
-    std::ifstream infile(configFilePath);
+    std::ifstream infile(config_file_path);
     std::string line;
     while (getline(infile, line))
     {

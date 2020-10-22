@@ -1,32 +1,17 @@
 #include "../header/ActionTaker.h"
 
-// void log() {
-//         std::string twodot = ":";
-//     std::string arrow = " -> ";
-//     std::cout << std::endl
-//               << "Protocol: " << protocol.c_str() << std::endl;
-//     if (protocol.compare("icmp") == 0)
-//     {
-//         std::cout << srcIp << " -> " << dstIp << std::endl;
-//     }
-//     else
-//     {
-//         std::cout << srcIp << ":" << srcPort << " -> " << dstIp << ":" << dstPort << std::endl;
-//     }
-// }
-
 int getAction(std::string protocol, std::string srcIp, std::string srcPort, std::string dstIp, std::string dstPort, std::vector<RuleHeader> &rules, int mode)
 {
     int action = 1;
     for (auto &rule : rules)
     {
         if ((matchProtocol(rule.protocol, protocol)) &&
-            matchIp(rule.srcIp, srcIp) &&
-            matchIp(rule.dstIp, dstIp) &&
-            matchPort(rule.srcPort, srcPort) &&
-            matchPort(rule.dstPort, dstPort))
+            matchIp(rule.src_ip, srcIp) &&
+            matchIp(rule.dst_ip, dstIp) &&
+            matchPort(rule.src_port, srcPort) &&
+            matchPort(rule.dst_port, dstPort))
         {
-            if (rule.count == 0 || rule.matchPacketCount)
+            if (rule.count == 0 || rule.match_packet_count)
             {
                 if (rule.action.compare("pass") == 0)
                 {
@@ -44,18 +29,18 @@ int getAction(std::string protocol, std::string srcIp, std::string srcPort, std:
             }
             else
             {
-                if (rule.packetCount == 0)
+                if (rule.packet_count == 0)
                 {
-                    rule.startTime = clock();
+                    rule.start_time = clock();
                 }
-                rule.packetCount++;
-                if (rule.packetCount >= rule.count)
+                rule.packet_count++;
+                if (rule.packet_count >= rule.count)
                 {
                     clock_t endTime = clock();
-                    double passedTime = double(endTime - rule.startTime) / double(CLOCKS_PER_SEC);
+                    double passedTime = double(endTime - rule.start_time) / double(CLOCKS_PER_SEC);
                     if (passedTime <= (double)rule.time)
                     {
-                        rule.matchPacketCount = true;
+                        rule.match_packet_count = true;
                         if (mode == IPS_MODE)
                         {
                             action = 3;
@@ -64,7 +49,7 @@ int getAction(std::string protocol, std::string srcIp, std::string srcPort, std:
                     }
                     else
                     {
-                        rule.packetCount = 0;
+                        rule.packet_count = 0;
                     }
                 }
             }

@@ -1,28 +1,22 @@
 #include "../header/IptablesSetup.h"
 
-void backupIptalbes()
+void backup_iptables()
 {
-	std::string iptablesFile = getConfigValue("iptablesFile");
+	std::string iptablesFile = get_config_value("iptablesFile");
 	std::string command = "iptables-save > " + iptablesFile;
 	system(command.c_str());
 }
 
-void restoreIptalbes()
+void restore_iptables()
 {
-	std::string iptablesFile = getConfigValue("iptablesFile");
+	std::string iptablesFile = get_config_value("iptablesFile");
 	std::string command = "iptables-restore < " + iptablesFile;
 	system(command.c_str());
 }
 
-void clearIptables()
+void setup_iptables(std::string interface)
 {
-	std::string command = "iptables -F";
-	system(command.c_str());
-}
-
-void setupIptables(std::string interface)
-{
-	backupIptalbes();
+	backup_iptables();
 	std::string command = "iptables -I FORWARD -j NFQUEUE -i " + interface;
 	system(command.c_str());
 }

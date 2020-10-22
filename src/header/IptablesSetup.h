@@ -9,9 +9,8 @@
 #include <vector>
 #include "../header/ConfigReader.h"
 
-void backupIptalbes();
-void restoreIptalbes();
-void clearIptables();
-void setupIptables(std::string interface);
+void backup_iptables();
+void restore_iptables();
+void setup_iptables(std::string interface);
 
 #endif

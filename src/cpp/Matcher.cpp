@@ -47,7 +47,6 @@ bool matchIp(string ruleIp, string packetIp)
 
 bool matchPort(string rulePort, string packetPort)
 {
-	std::cout << rulePort << " " << packetPort << std::endl;
 	if (rulePort.compare("any") == 0 || rulePort.compare("any\n") == 0 || packetPort.compare("any") == 0 || rulePort.compare(packetPort) == 0)
 	{
 		return true;

@@ -25,7 +25,7 @@ void logPacketInfo(std::string message)
 
     std::ofstream myfile;
 
-    std::string logFile = getConfigValue("logFile");
+    std::string logFile = get_config_value("logFile");
     myfile.open(logFile, std::ios_base::app);
     myfile << currTime << "\t\t" << message << std::endl;
     myfile.close();

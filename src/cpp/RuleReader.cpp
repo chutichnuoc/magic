@@ -1,33 +1,33 @@
 #include "../header/RuleReader.h"
 
-std::vector<RuleHeader> getRules(std::string filePath)
+std::vector<RuleHeader> get_rules(std::string file_path)
 {
     std::vector<RuleHeader> rules;
-    std::ifstream infile(filePath);
+    std::ifstream infile(file_path);
     std::string line;
     while (getline(infile, line))
     {
         std::istringstream iss(line);
-        std::string action, protocol, srcIp, srcPort, flow, dstIp, dstPort;
-        if (!(iss >> action >> protocol >> srcIp >> srcPort >> flow >> dstIp >> dstPort))
+        std::string action, protocol, src_ip, src_port, flow, dst_ip, dst_port;
+        if (!(iss >> action >> protocol >> src_ip >> src_port >> flow >> dst_ip >> dst_port))
         {
             iss.clear();
             break;
         }
-        RuleHeader rule(action, protocol, srcIp, srcPort, dstIp, dstPort);
+        RuleHeader rule(action, protocol, src_ip, src_port, dst_ip, dst_port);
         if (line.find('(') != std::string::npos && line.find(')') != std::string::npos)
         {
             std::string option = line.substr(line.find('(') + 1, line.find(')') - line.find('(') - 1);
             if (option.find("time") != std::string::npos)
             {
-                std::string time = getOptionValueByKey(option, "time");
+                std::string time = get_option_value_by_key(option, "time");
                 rule.time = std::stoi(time);
             }
             if (option.find("count") != std::string::npos)
             {
-                std::string count = getOptionValueByKey(option, "count");
+                std::string count = get_option_value_by_key(option, "count");
                 rule.count = std::stoi(count);
-                rule.matchPacketCount = false;
+                rule.match_packet_count = false;
             }
         }
         rules.push_back(rule);
@@ -36,13 +36,13 @@ std::vector<RuleHeader> getRules(std::string filePath)
     return rules;
 }
 
-std::string getOptionValueByKey(std::string option, std::string key)
+std::string get_option_value_by_key(std::string option, std::string key)
 {
     std::string value;
-    std::string keyExtend = key.append(": ");
-    int keyExtendLength = keyExtend.length();
-    std::string subOption = option.substr(option.find(keyExtend) + keyExtendLength);
-    int nIndex = subOption.find(';');
-    value = option.substr(option.find(keyExtend) + keyExtendLength, nIndex);
+    std::string key_extend = key.append(": ");
+    int key_extend_length = key_extend.length();
+    std::string sub_option = option.substr(option.find(key_extend) + key_extend_length);
+    int nIndex = sub_option.find(';');
+    value = option.substr(option.find(key_extend) + key_extend_length, nIndex);
     return value;
 }

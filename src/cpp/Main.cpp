@@ -14,38 +14,20 @@
 #include <linux/netfilter.h>
 #include <libnetfilter_queue/libnetfilter_queue.h>
 
-#include "../sniff_header/sniff_ip.h"
-
 #include "../header/RuleHeader.h"
 #include "../header/RuleReader.h"
 #include "../header/ActionTaker.h"
 #include "../header/IptablesSetup.h"
 #include "../header/ConfigReader.h"
 #include "../header/ProtocolHandler.h"
+#include "../header/CommonUtil.h"
 
 vector<RuleHeader> rules;
 int mode = IDS_MODE;
 
-std::string exec(const char *cmd)
+void print_app_usage()
 {
-	std::array<char, 128> buffer;
-	std::string result;
-	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
-	if (!pipe)
-	{
-		throw std::runtime_error("popen() failed!");
-	}
-	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
-	{
-		result += buffer.data();
-	}
-	return result;
-}
-
-void printAppUsage()
-{
-	cout << "Usage: " << APP_NAME << " [interface] [mode] [config]" << endl
-		 << endl;
+	cout << "Usage: " << APP_NAME << " [interface] [mode] [config]" << endl << endl;
 	cout << "Options: " << endl;
 	cout << "    interface    Listen on <interface> for packets" << endl;
 	cout << "    mode    	  Capture mode" << endl;
@@ -54,101 +36,42 @@ void printAppUsage()
 	return;
 }
 
-void handleSigint(int sig)
+void handle_sigint(int sig)
 {
 	if (mode == IPS_MODE)
 	{
 		std::cout << "Restoring iptables" << endl;
-		restoreIptalbes();
+		restore_iptables();
 		std::cout << "Restored iptables" << endl;
 	}
-	exit(EXIT_SUCCESS);
+	exit(0);
 }
 
-static int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfa, void *data)
+static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfa, void *data)
 {
 	uint8_t *packet = NULL;
 	nfq_get_payload(nfa, &packet);
 
-	const struct sniff_ip *ip; /* The IP header */
-	int size_ip;
-	/* define/compute ip header offset */
-	ip = (struct sniff_ip *)(packet);
-	size_ip = IP_HL(ip) * 4;
-	if (size_ip < 20)
-	{
-		printf("   * Invalid IP header length: %u bytes\n", size_ip);
-		return 0;
-	}
-	std::string srcIp("any");
-	std::string dstIp("any");
-
-	srcIp = inet_ntoa(ip->ip_src);
-	dstIp = inet_ntoa(ip->ip_dst);
-
-	std::string srcPort("any");
-	std::string dstPort("any");
-
 	std::string protocol("ip");
+	std::string src_ip("any");
+	std::string dst_ip("any");
+	std::string src_port("any");
+	std::string dst_port("any");
 
-	/* determine protocol */
-	switch (ip->ip_p)
-	{
-	case IPPROTO_TCP:
-		protocol = "tcp";
-		handle_tcp(packet, size_ip, &srcPort, &dstPort);
-		break;
-	case IPPROTO_UDP:
-		protocol = "udp";
-		handle_udp(packet, size_ip, &srcPort, &dstPort);
-		break;
-	case IPPROTO_ICMP:
-		protocol = "icmp";
-		srcPort = "any";
-		dstPort = "any";
-		break;
-	}
+	handle_ip(packet, &protocol, &src_ip, &src_port, &dst_ip, &dst_port);
 	int nfAction = NF_ACCEPT;
-	std::cout << rules.size() << std::endl;
-	int action = getAction(protocol, srcIp, srcPort, dstIp, dstPort, rules, mode);
-	if (action == 1)
+	int action = getAction(protocol, src_ip, src_port, dst_ip, dst_port, rules, mode);
+	if (action == ALERT)
 	{
-		// pass
+		cout << packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, false) << endl;
 	}
-	else if (action == 2)
+	else if (action == DROP)
 	{
-		// log
-		std::string twodot = ":";
-		std::string arrow = " -> ";
-		std::cout << std::endl
-				  << "Protocol: " << protocol.c_str() << std::endl;
-		if (protocol.compare("icmp") == 0)
-		{
-			std::cout << srcIp << " -> " << dstIp << std::endl;
-		}
-		else
-		{
-			std::cout << srcIp << ":" << srcPort << " -> " << dstIp << ":" << dstPort << std::endl;
-		}
-	}
-	else if (action == 3)
-	{
-		std::string twodot = ":";
-		std::string arrow = " -> ";
-		std::cout << std::endl
-				  << "Protocol: " << protocol.c_str() << std::endl;
-		if (protocol.compare("icmp") == 0)
-		{
-			std::cout << srcIp << " -> " << dstIp << " (drop)" << std::endl;
-		}
-		else
-		{
-			std::cout << srcIp << ":" << srcPort << " -> " << dstIp << ":" << dstPort << " (drop)"  << std::endl;
-		}
+		cout << packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, true) << endl;
 		nfAction = NF_DROP;
 	}
 
-	cout << exec("grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage \"%\"}'") << endl;
+	cout << get_cpu_usage() << endl;
 
 	u_int32_t id;
 	struct nfqnl_msg_packet_hdr *ph;
@@ -159,25 +82,24 @@ static int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *
 
 int main(int argc, char *argv[])
 {
-	signal(SIGINT, handleSigint);
+	signal(SIGINT, handle_sigint);
 
 	if (argc != 4)
 	{
-		cout << stderr << "error: unrecognized command-line options" << endl
-			 << endl;
-		printAppUsage();
-		exit(EXIT_FAILURE);
+		cout << stderr << "error: unrecognized command-line options" << endl << endl;
+		print_app_usage();
+		exit(1);
 	}
 
 	string interface = argv[1];
-	string runningMode = argv[2];
-	string configFile = argv[3];
+	string running_mode = argv[2];
+	string config_file = argv[3];
 
-	setConfigFilePath(configFile);
-	setupIptables(interface);
-	string ruleFilePath = getConfigValue("ruleFile");
-	rules = getRules(ruleFilePath);
-	mode = (runningMode.compare("IPS") == 0) ? IPS_MODE : IDS_MODE;
+	set_config_File_path(config_file);
+	setup_iptables(interface);
+	string rule_file_path = get_config_value("ruleFile");
+	rules = get_rules(rule_file_path);
+	mode = (running_mode.compare("IPS") == 0) ? IPS_MODE : IDS_MODE;
 
 	struct nfq_handle *h;
 	struct nfq_q_handle *qh;
@@ -185,7 +107,7 @@ int main(int argc, char *argv[])
 	int rv;
 	char buf[4096] __attribute__((aligned));
 
-	printf("opening library handle\n");
+	// printf("opening library handle\n");
 	h = nfq_open();
 	if (!h)
 	{
@@ -193,29 +115,29 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	printf("unbinding existing nf_queue handler for AF_INET (if any)\n");
+	// printf("unbinding existing nf_queue handler for AF_INET (if any)\n");
 	if (nfq_unbind_pf(h, AF_INET) < 0)
 	{
 		fprintf(stderr, "error during nfq_unbind_pf()\n");
 		exit(1);
 	}
 
-	printf("binding nfnetlink_queue as nf_queue handler for AF_INET\n");
+	// printf("binding nfnetlink_queue as nf_queue handler for AF_INET\n");
 	if (nfq_bind_pf(h, AF_INET) < 0)
 	{
 		fprintf(stderr, "error during nfq_bind_pf()\n");
 		exit(1);
 	}
 
-	printf("binding this socket to queue '0'\n");
-	qh = nfq_create_queue(h, 0, &cb, NULL);
+	// printf("binding this socket to queue '0'\n");
+	qh = nfq_create_queue(h, 0, &callback, NULL);
 	if (!qh)
 	{
 		fprintf(stderr, "error during nfq_create_queue()\n");
 		exit(1);
 	}
 
-	printf("setting copy_packet mode\n");
+	// printf("setting copy_packet mode\n");
 	if (nfq_set_mode(qh, NFQNL_COPY_PACKET, 0xffff) < 0)
 	{
 		fprintf(stderr, "can't set packet_copy mode\n");
@@ -231,7 +153,7 @@ int main(int argc, char *argv[])
 		nfq_handle_packet(h, buf, rv);
 	}
 
-	printf("unbinding from queue 0\n");
+	// printf("unbinding from queue 0\n");
 	nfq_destroy_queue(qh);
 
 #ifdef INSANE
@@ -241,7 +163,7 @@ int main(int argc, char *argv[])
 	nfq_unbind_pf(h, AF_INET);
 #endif
 
-	printf("closing library handle\n");
+	// printf("closing library handle\n");
 	nfq_close(h);
 
 	exit(0);

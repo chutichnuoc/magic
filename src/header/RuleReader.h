@@ -7,7 +7,7 @@
 #include <sstream>
 #include "RuleHeader.h"
 
-std::vector<RuleHeader> getRules(std::string filePath);
-std::string getOptionValueByKey(std::string option, std::string key);
+std::vector<RuleHeader> get_rules(std::string filePath);
+std::string get_option_value_by_key(std::string option, std::string key);
 
 #endif
