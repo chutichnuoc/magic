@@ -1,8 +1,6 @@
 #define APP_NAME "Magic"
 
 #include "stdlib.h"
-#include "PcapLiveDeviceList.h"
-#include "PcapFileDevice.h"
 #include <iostream>
 #include <bits/stdc++.h>
 #include <sys/wait.h>
@@ -18,7 +16,6 @@
 #include "../header/RuleReader.h"
 #include "../header/ActionTaker.h"
 #include "../header/IptablesSetup.h"
-#include "../header/ConfigReader.h"
 #include "../header/ProtocolHandler.h"
 #include "../header/CommonUtil.h"
 
@@ -60,18 +57,20 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_
 
 	handle_ip(packet, &protocol, &src_ip, &src_port, &dst_ip, &dst_port);
 	int nfAction = NF_ACCEPT;
-	int action = getAction(protocol, src_ip, src_port, dst_ip, dst_port, rules, mode);
+	int action = get_action(protocol, src_ip, src_port, dst_ip, dst_port, rules, mode);
 	if (action == ALERT)
 	{
-		cout << packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, false) << endl;
+		std::string message = packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, false);
+		cout << message << endl;
+		log_packet_info(message);
 	}
 	else if (action == DROP)
 	{
-		cout << packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, true) << endl;
+		std::string message = packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, true);
+		cout << message << endl;
+		log_packet_info(message);
 		nfAction = NF_DROP;
 	}
-
-	cout << get_cpu_usage() << endl;
 
 	u_int32_t id;
 	struct nfqnl_msg_packet_hdr *ph;
@@ -95,7 +94,7 @@ int main(int argc, char *argv[])
 	string running_mode = argv[2];
 	string config_file = argv[3];
 
-	set_config_File_path(config_file);
+	set_config_file_path(config_file);
 	setup_iptables(interface);
 	string rule_file_path = get_config_value("ruleFile");
 	rules = get_rules(rule_file_path);

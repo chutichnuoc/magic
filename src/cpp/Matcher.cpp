@@ -14,9 +14,7 @@ bool matchIp(string ruleIp, string packetIp)
 		return true;
 	}
 
-	bool exclamation = false;
-	bool subnet = false;
-	int slashIndex = 0;
+ 	int slashIndex = 0;
 	int start = 0;
 	int end = ruleIp.length() - 1;
 	uint32_t netmask;
@@ -25,14 +23,12 @@ bool matchIp(string ruleIp, string packetIp)
 
 	if (ruleIp.find('!') != string::npos)
 	{
-		exclamation = true;
 		start = 1;
 	}
 
-	slashIndex = ruleIp.find('/');
+ 	slashIndex = ruleIp.find('/');
 	if (slashIndex != string::npos)
 	{
-		subnet = true;
 		string mask = ruleIp.substr(slashIndex + 1);
 		netmask = static_cast<uint32_t>(stoul(mask));
 		end = slashIndex - 1;
@@ -79,4 +75,14 @@ uint32_t getNetIp(string ruleIp, int start, int end)
 {
 	string ip = ruleIp.substr(start, end);
 	uint32_t result = static_cast<uint32_t>(stoul(ip));
+	return result;
+}
+
+bool match_packet(std::string protocol, std::string srcIp, std::string srcPort, std::string dstIp, std::string dstPort, RuleHeader rule)
+{
+	return (matchProtocol(rule.protocol, protocol)) &&
+            matchIp(rule.src_ip, srcIp) &&
+            matchIp(rule.dst_ip, dstIp) &&
+            matchPort(rule.src_port, srcPort) &&
+            matchPort(rule.dst_port, dstPort);
 }

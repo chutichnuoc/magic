@@ -38,3 +38,5 @@
 
 # out folder
 out/
+obj/
+target/

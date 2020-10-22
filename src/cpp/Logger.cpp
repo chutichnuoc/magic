@@ -1,27 +1,16 @@
 #include "../header/Logger.h"
 
-void getCurrentDir()
+void log_packet_info(std::string message)
 {
-    char cwd[1024];
-    chdir("/path/to/change/directory/to");
-    getcwd(cwd, sizeof(cwd));
-    std::string dir(cwd);
-    std::cout << "Current working dir: " << dir << std::endl;
-}
-
-void logPacketInfo(std::string message)
-{
-    time_t rawtime;
-    struct tm *timeinfo;
+    time_t raw_time;
+    struct tm *time_info;
     char buffer[80];
 
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
+    time(&raw_time);
+    time_info = localtime(&raw_time);
 
-    strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
+    strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", time_info);
     std::string currTime(buffer);
-
-    // getCurrentDir();
 
     std::ofstream myfile;
 

@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include "../header/ConfigReader.h"
 
-void getCurrentDir();
-void logPacketInfo(std::string message);
+void log_packet_info(std::string message);
 
 #endif

@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 
-void set_config_File_path(std::string path);
+void set_config_file_path(std::string path);
 
 std::string get_config_value(std::string key);
 
