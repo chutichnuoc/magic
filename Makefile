@@ -22,4 +22,4 @@ $(OBJ)/%.o: $(SRC)/%.cpp
 	$(CC) $(CFLAGS) -I$(SRC) -c $< -o $@ $(LIBS)
 
 clean:
-	$(RM) *.o $(shell find . -type f -executable ! -name "*.*")
+	$(RM) $(OBJ)/*.o $(shell find . -type f -executable ! -name "*.*")

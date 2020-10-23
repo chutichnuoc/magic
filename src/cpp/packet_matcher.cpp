@@ -1,4 +1,4 @@
-#include "../header/Matcher.h"
+#include "../header/packet_matcher.h"
 
 bool match_protocol(string rule_protocol, string packet_protocol)
 {
@@ -14,31 +14,30 @@ bool match_ip(string rule_ip, string packet_ip)
 		return true;
 	}
 
-	int slashIndex = 0;
 	int start = 0;
 	int end = rule_ip.length() - 1;
 	uint32_t netmask;
 	uint32_t ip = ip_to_int(packet_ip);
-	uint32_t netIp;
+	uint32_t net_ip;
 
 	if (rule_ip.find('!') != string::npos)
 	{
 		start = 1;
 	}
 
-	slashIndex = rule_ip.find('/');
-	if (slashIndex != string::npos)
+	int slash_index = rule_ip.find('/');
+	if (slash_index != string::npos)
 	{
-		string mask = rule_ip.substr(slashIndex + 1);
+		string mask = rule_ip.substr(slash_index + 1);
 		netmask = static_cast<uint32_t>(stoul(mask));
-		end = slashIndex - 1;
+		end = slash_index - 1;
 	}
 
-	netIp = get_net_ip(rule_ip, start, end);
+	net_ip = get_net_ip(rule_ip, start, end);
 
-	uint32_t netstart = (netIp & netmask);	 // first ip in subnet
-	uint32_t netend = (netstart | ~netmask); // last ip in subnet
-	return ((ip >= netstart) && (ip <= netend));
+	uint32_t net_start = (net_ip & netmask);	 // first ip in subnet
+	uint32_t net_end = (net_start | ~netmask); // last ip in subnet
+	return ((ip >= net_start) && (ip <= net_end));
 }
 
 bool match_port(string rule_port, string packet_port)
@@ -71,14 +70,14 @@ uint32_t ip_to_int(string ip)
 	return addr;
 }
 
-uint32_t get_net_ip(string rule_ip, int start, int end)
+uint32_t get_net_ip(string net_ip, int start, int end)
 {
-	string ip = rule_ip.substr(start, end);
+	string ip = net_ip.substr(start, end);
 	uint32_t result = static_cast<uint32_t>(stoul(ip));
 	return result;
 }
 
-bool match_packet(std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port, RuleHeader rule)
+bool match_packet(std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port, rule_header rule)
 {
 	return (match_protocol(rule.protocol, protocol)) &&
 		   match_ip(rule.src_ip, src_ip) &&

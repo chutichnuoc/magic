@@ -1,7 +1,7 @@
 #ifndef IPTABLES_SETUP_H
 #define IPTABLES_SETUP_H
 
-#include "../header/ConfigReader.h"
+#include "config_reader.h"
 
 void backup_iptables();
 void restore_iptables();

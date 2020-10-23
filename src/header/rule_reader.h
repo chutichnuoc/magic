@@ -5,9 +5,10 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include "RuleHeader.h"
 
-std::vector<RuleHeader> get_rules(std::string filePath);
+#include "rule_header.h"
+
+std::vector<rule_header> get_rules(std::string file_path);
 std::string get_option_value_by_key(std::string option, std::string key);
 
 #endif

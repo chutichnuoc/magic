@@ -1,4 +1,4 @@
-#include "../header/ConfigReader.h"
+#include "../header/config_reader.h"
 
 static std::string config_file_path;
 
@@ -13,10 +13,10 @@ std::string get_config_value(std::string key)
     std::string line;
     while (getline(infile, line))
     {
-        int keyIndex = line.find(key);
-        if (keyIndex != std::string::npos)
+        int key_index = line.find(key);
+        if (key_index != std::string::npos)
         {
-            std::string value = line.substr(keyIndex + key.length() + 3);
+            std::string value = line.substr(key_index + key.length() + 3);
             return value;
         }
     }

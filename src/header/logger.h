@@ -3,7 +3,8 @@
 
 #include <fstream>
 #include <ctime>
-#include "../header/ConfigReader.h"
+
+#include "config_reader.h"
 
 void log_packet_info(std::string message);
 

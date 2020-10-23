@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-class RuleHeader
+class rule_header
 {
 public:
     std::string action;
@@ -23,7 +23,7 @@ public:
     int packet_count = 0;
     bool match_packet_count = false;
 
-    RuleHeader(std::string action, std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port)
+    rule_header(std::string action, std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port)
     {
         this->action = action;
         this->protocol = protocol;
@@ -38,7 +38,6 @@ public:
         std::cout << this->action << " " << this->protocol << " " << this->src_ip << " " << this->src_port << " -> " << this->dst_ip << " " << this->dst_port << std::endl;
         std::cout << this->time << " " << this->count << std::endl;
     }
-
 };
 
 #endif

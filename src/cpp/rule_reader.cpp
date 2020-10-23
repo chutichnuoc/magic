@@ -1,8 +1,8 @@
-#include "../header/RuleReader.h"
+#include "../header/rule_reader.h"
 
-std::vector<RuleHeader> get_rules(std::string file_path)
+std::vector<rule_header> get_rules(std::string file_path)
 {
-    std::vector<RuleHeader> rules;
+    std::vector<rule_header> rules;
     std::ifstream infile(file_path);
     std::string line;
     while (getline(infile, line))
@@ -14,7 +14,7 @@ std::vector<RuleHeader> get_rules(std::string file_path)
             iss.clear();
             break;
         }
-        RuleHeader rule(action, protocol, src_ip, src_port, dst_ip, dst_port);
+        rule_header rule(action, protocol, src_ip, src_port, dst_ip, dst_port);
         if (line.find('(') != std::string::npos && line.find(')') != std::string::npos)
         {
             std::string option = line.substr(line.find('(') + 1, line.find(')') - line.find('(') - 1);

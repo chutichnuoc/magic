@@ -1,6 +1,6 @@
-#include "../header/ActionGetter.h"
+#include "../header/action_getter.h"
 
-int rule_action_to_app_action(RuleHeader rule)
+int rule_action_to_app_action(rule_header rule)
 {
     int action = PASS;
     if (rule.action.compare("pass") == 0)
@@ -18,7 +18,7 @@ int rule_action_to_app_action(RuleHeader rule)
     return action;
 }
 
-int get_action(std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port, std::vector<RuleHeader> &rules, int mode)
+int get_action(std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port, std::vector<rule_header> &rules, int mode)
 {
     int action = PASS;
     for (auto &rule : rules)
@@ -33,6 +33,11 @@ int get_action(std::string protocol, std::string src_ip, std::string src_port, s
             else
             {
                 if (get_cpu_usage() >= rule.cpu_usage)
+                {
+                    action = rule_action_to_app_action(rule);
+                    break;
+                }
+                else if (rule.match_packet_count)
                 {
                     action = rule_action_to_app_action(rule);
                     break;
@@ -59,11 +64,6 @@ int get_action(std::string protocol, std::string src_ip, std::string src_port, s
                     {
                         rule.packet_count = 0;
                     }
-                }
-                else if (rule.match_packet_count)
-                {
-                    action = rule_action_to_app_action(rule);
-                    break;
                 }
             }
         }

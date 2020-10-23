@@ -2,21 +2,20 @@
 
 #include <iostream>
 #include <signal.h>
-
 #include <netinet/in.h>
 #include <linux/types.h>
 #include <linux/netfilter.h>
 #include <libnetfilter_queue/libnetfilter_queue.h>
 
-#include "../header/RuleHeader.h"
-#include "../header/RuleReader.h"
-#include "../header/ActionGetter.h"
-#include "../header/IptablesSetup.h"
-#include "../header/ProtocolHandler.h"
-#include "../header/CommonUtil.h"
-#include "../header/Logger.h"
+#include "../header/rule_header.h"
+#include "../header/rule_reader.h"
+#include "../header/action_getter.h"
+#include "../header/iptables_setter.h"
+#include "../header/packet_parser.h"
+#include "../header/common_util.h"
+#include "../header/logger.h"
 
-vector<RuleHeader> rules;
+vector<rule_header> rules;
 int mode = IDS_MODE;
 
 void print_app_usage()
@@ -53,7 +52,7 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_
 	std::string dst_port("any");
 
 	handle_ip(packet, &protocol, &src_ip, &src_port, &dst_ip, &dst_port);
-	int nfAction = NF_ACCEPT;
+	int nf_action = NF_ACCEPT;
 	int action = get_action(protocol, src_ip, src_port, dst_ip, dst_port, rules, mode);
 	if (action == ALERT)
 	{
@@ -66,14 +65,14 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_
 		std::string message = packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, true);
 		cout << message << endl;
 		log_packet_info(message);
-		nfAction = NF_DROP;
+		nf_action = NF_DROP;
 	}
 
 	u_int32_t id;
 	struct nfqnl_msg_packet_hdr *ph;
 	ph = nfq_get_msg_packet_hdr(nfa);
 	id = ntohl(ph->packet_id);
-	return nfq_set_verdict(qh, id, nfAction, 0, NULL);
+	return nfq_set_verdict(qh, id, nf_action, 0, NULL);
 }
 
 int main(int argc, char *argv[])
