@@ -17,6 +17,7 @@ void restore_iptables()
 void setup_iptables(std::string interface)
 {
 	backup_iptables();
+	printf("Setting iptables nfqueue\n");
 	std::string command = "iptables -I FORWARD -j NFQUEUE -i " + interface;
 	system(command.c_str());
 }

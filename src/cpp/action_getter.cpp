@@ -59,10 +59,10 @@ int get_action(std::string protocol, std::string src_ip, std::string src_port, s
                             action = rule_action_to_app_action(rule);
                             break;
                         }
-                    }
-                    else
-                    {
-                        rule.packet_count = 0;
+                        else
+                        {
+                            rule.packet_count = 0;
+                        }
                     }
                 }
             }

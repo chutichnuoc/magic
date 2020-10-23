@@ -20,12 +20,11 @@ int mode = IDS_MODE;
 
 void print_app_usage()
 {
-	cout << "Usage: " << APP_NAME << " [interface] [mode] [config]" << endl << endl;
-	cout << "Options: " << endl;
-	cout << "    interface    Listen on <interface> for packets" << endl;
-	cout << "    mode    	  Capture mode" << endl;
-	cout << "    config    	  Config file" << endl;
-	cout << endl;
+	printf("Usage: %s [interface] [mode] [config]\n\n", APP_NAME);
+	printf("Options: \n");
+	printf("    interface    Listen on <interface> for packets\n");
+	printf("    mode    	  Capture mode\n");
+	printf("    config    	  Config file\n\n");
 	return;
 }
 
@@ -33,9 +32,9 @@ void handle_sigint(int sig)
 {
 	if (mode == IPS_MODE)
 	{
-		std::cout << "Restoring iptables" << endl;
+		printf("\nRestoring iptables\n");
 		restore_iptables();
-		std::cout << "Restored iptables" << endl;
+		printf("Restored iptables\n");
 	}
 	exit(0);
 }
@@ -57,13 +56,13 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_
 	if (action == ALERT)
 	{
 		std::string message = packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, false);
-		cout << message << endl;
+		printf("%s\n", message.c_str());
 		log_packet_info(message);
 	}
 	else if (action == DROP && mode == IPS_MODE)
 	{
 		std::string message = packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, true);
-		cout << message << endl;
+		printf("%s\n", message.c_str());
 		log_packet_info(message);
 		nf_action = NF_DROP;
 	}
@@ -81,18 +80,18 @@ int main(int argc, char *argv[])
 
 	if (argc != 4)
 	{
-		cout << stderr << "error: unrecognized command-line options" << endl << endl;
+		fprintf(stderr, "Error: unrecognized command-line options\n\n");
 		print_app_usage();
 		exit(1);
 	}
 
-	string interface = argv[1];
-	string running_mode = argv[2];
-	string config_file = argv[3];
+	std::string interface = argv[1];
+	std::string running_mode = argv[2];
+	std::string config_file = argv[3];
 
 	set_config_file_path(config_file);
 	setup_iptables(interface);
-	string rule_file_path = get_config_value("ruleFile");
+	std::string rule_file_path = get_config_value("ruleFile");
 	rules = get_rules(rule_file_path);
 	transform(running_mode.begin(), running_mode.end(), running_mode.begin(), ::tolower);
 	mode = (running_mode.compare("ips") == 0) ? IPS_MODE : IDS_MODE;
@@ -103,40 +102,40 @@ int main(int argc, char *argv[])
 	int rv;
 	char buf[4096] __attribute__((aligned));
 
-	// printf("opening library handle\n");
+	printf("Opening library handle\n");
 	h = nfq_open();
 	if (!h)
 	{
-		fprintf(stderr, "error during nfq_open()\n");
+		fprintf(stderr, "Error during nfq_open()\n");
 		exit(1);
 	}
 
-	// printf("unbinding existing nf_queue handler for AF_INET (if any)\n");
+	printf("Unbinding existing nf_queue handler for AF_INET (if any)\n");
 	if (nfq_unbind_pf(h, AF_INET) < 0)
 	{
-		fprintf(stderr, "error during nfq_unbind_pf()\n");
+		fprintf(stderr, "Error during nfq_unbind_pf()\n");
 		exit(1);
 	}
 
-	// printf("binding nfnetlink_queue as nf_queue handler for AF_INET\n");
+	printf("Binding nfnetlink_queue as nf_queue handler for AF_INET\n");
 	if (nfq_bind_pf(h, AF_INET) < 0)
 	{
-		fprintf(stderr, "error during nfq_bind_pf()\n");
+		fprintf(stderr, "Error during nfq_bind_pf()\n");
 		exit(1);
 	}
 
-	// printf("binding this socket to queue '0'\n");
+	printf("binding this socket to queue '0'\n");
 	qh = nfq_create_queue(h, 0, &callback, NULL);
 	if (!qh)
 	{
-		fprintf(stderr, "error during nfq_create_queue()\n");
+		fprintf(stderr, "Error during nfq_create_queue()\n");
 		exit(1);
 	}
 
-	// printf("setting copy_packet mode\n");
+	printf("Setting copy_packet mode\n");
 	if (nfq_set_mode(qh, NFQNL_COPY_PACKET, 0xffff) < 0)
 	{
-		fprintf(stderr, "can't set packet_copy mode\n");
+		fprintf(stderr, "Can't set packet_copy mode\n");
 		exit(1);
 	}
 
@@ -144,22 +143,24 @@ int main(int argc, char *argv[])
 
 	// para el tema del loss:   while ((rv = recv(fd, buf, sizeof(buf), 0)) && rv >= 0)
 
+	printf("Start capturing...\n");
+
 	while ((rv = recv(fd, buf, sizeof(buf), 0)))
 	{
 		nfq_handle_packet(h, buf, rv);
 	}
 
-	// printf("unbinding from queue 0\n");
+	printf("Unbinding from queue 0\n");
 	nfq_destroy_queue(qh);
 
 #ifdef INSANE
 	/* normally, applications SHOULD NOT issue this command, since
 	 * it detaches other programs/sockets from AF_INET, too ! */
-	printf("unbinding from AF_INET\n");
+	printf("Unbinding from AF_INET\n");
 	nfq_unbind_pf(h, AF_INET);
 #endif
 
-	// printf("closing library handle\n");
+	printf("Closing library handle\n");
 	nfq_close(h);
 
 	exit(0);

@@ -4,6 +4,7 @@ static std::string config_file_path;
 
 void set_config_file_path(std::string path)
 {
+    printf("Setting config file path\n");
     config_file_path = path;
 }
 

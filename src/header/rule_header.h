@@ -33,7 +33,7 @@ public:
         this->dst_port = dst_port;
     }
 
-    void toString()
+    void to_string()
     {
         std::cout << this->action << " " << this->protocol << " " << this->src_ip << " " << this->src_port << " -> " << this->dst_ip << " " << this->dst_port << std::endl;
         std::cout << this->time << " " << this->count << std::endl;

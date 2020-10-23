@@ -2,6 +2,7 @@
 
 std::vector<rule_header> get_rules(std::string file_path)
 {
+    printf("Getting rules\n");
     std::vector<rule_header> rules;
     std::ifstream infile(file_path);
     std::string line;

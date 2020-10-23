@@ -8,7 +8,7 @@ void handle_tcp(const u_char *packet, int size_ip, std::string *src_port, std::s
 	size_tcp = TH_OFF(tcp) * 4;
 	if (size_tcp < 20)
 	{
-		std::cout << "   * Invalid TCP header length: " << size_tcp << " bytes" << std::endl;
+		printf("   * Invalid TCP header length:  %d bytes", size_tcp);
 		return;
 	}
 
@@ -24,7 +24,7 @@ void handle_udp(const u_char *packet, int size_ip, std::string *src_port, std::s
 	size_udp = udp->uh_ulen * 4;
 	if (size_udp < 20)
 	{
-		std::cout << "   * Invalid UDP header length: " << size_udp << " bytes" << std::endl;
+		printf("   * Invalid UDP header length:  %d bytes", size_udp);
 		return;
 	}
 
@@ -40,7 +40,7 @@ void handle_ip(const u_char *packet, std::string *protocol, std::string *src_ip,
 	size_ip = IP_HL(ip) * 4;
 	if (size_ip < 20)
 	{
-		std::cout << "   * Invalid IP header length: " << size_ip << " bytes" << std::endl;
+		printf("   * Invalid IP header length:  %d bytes", size_ip);
 		return;
 	}
 
