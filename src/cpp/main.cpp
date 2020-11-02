@@ -23,7 +23,8 @@ void print_app_usage()
 	printf("Usage: %s [interface] [mode] [config]\n\n", APP_NAME);
 	printf("Options: \n");
 	printf("    interface    Listen on <interface> for packets\n");
-	printf("    mode    	  Capture mode\n");
+	printf("    c_mode    	  Capture mode (IPS/IDS)\n");
+	printf("    r_mode    	  Running mode (NET/HOST)\n");
 	printf("    config    	  Config file\n\n");
 	return;
 }
@@ -78,7 +79,7 @@ int main(int argc, char *argv[])
 {
 	signal(SIGINT, handle_sigint);
 
-	if (argc != 4)
+	if (argc != 5)
 	{
 		fprintf(stderr, "Error: unrecognized command-line options\n\n");
 		print_app_usage();
@@ -86,15 +87,19 @@ int main(int argc, char *argv[])
 	}
 
 	std::string interface = argv[1];
-	std::string running_mode = argv[2];
-	std::string config_file = argv[3];
+	std::string capture_mode = argv[2];
+	std::string running_mode = argv[3];
+	std::string config_file = argv[4];
 
 	set_config_file_path(config_file);
-	setup_iptables(interface);
 	std::string rule_file_path = get_config_value("ruleFile");
 	rules = get_rules(rule_file_path);
+
+	transform(capture_mode.begin(), capture_mode.end(), capture_mode.begin(), ::tolower);
+	mode = (capture_mode.compare("ips") == 0) ? IPS_MODE : IDS_MODE;
+
 	transform(running_mode.begin(), running_mode.end(), running_mode.begin(), ::tolower);
-	mode = (running_mode.compare("ips") == 0) ? IPS_MODE : IDS_MODE;
+	setup_iptables(interface, running_mode);
 
 	struct nfq_handle *h;
 	struct nfq_q_handle *qh;
