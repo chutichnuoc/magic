@@ -1,5 +1,5 @@
-drop icmp 10.10.0.0/24 any -> any any (time: 4; count: 3; cpu: 10.5;)
-pass udp any !1234 -> any 53
+drop icmp 10.10.0.0/24 any -> any any (time: 4; count: 3;)
+drop tcp 192.168.22.107 any -> 192.168.22.101 any (cpu: 20.5;)
 alert ip any any -> any any (cpu: 1.5;)
 drop tcp 192.168.10.0/24 2030 -> 10.10.10.10 2050
 drop tcp any 2030 -> 10.10.10.10 2050

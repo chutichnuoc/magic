@@ -2,6 +2,7 @@
 #define COMMON_UTIL_H
 
 #include <iostream>
+#include <algorithm>
 #include <array>
 #include <memory>
 
