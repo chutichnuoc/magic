@@ -40,6 +40,5 @@ double get_cpu_usage()
     std::string cpu_idle = exec("top -b -d1 -n1 | grep -i \"Cpu(s)\" | awk '{print substr($0, 37, 5);}'");
     replace(cpu_idle.begin(), cpu_idle.end(), ',', '.');
     double cpu_usage = 100 - stod(cpu_idle);
-    std::cout << cpu_usage << "%" << std::endl;
     return cpu_usage;
 }
