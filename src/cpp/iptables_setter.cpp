@@ -18,7 +18,7 @@ void setup_iptables(std::string interface, std::string mode)
 {
 	backup_iptables();
 	printf("Setting iptables nfqueue\n");
-	if (mode.compare("NET") == 0)
+	if (mode.compare("net") == 0)
 	{
 		std::string command = "iptables -I FORWARD -j NFQUEUE -i " + interface;
 		system(command.c_str());

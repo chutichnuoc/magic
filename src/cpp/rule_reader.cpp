@@ -19,10 +19,10 @@ std::vector<rule_header> get_rules(std::string file_path)
         if (line.find('(') != std::string::npos && line.find(')') != std::string::npos)
         {
             std::string option = line.substr(line.find('(') + 1, line.find(')') - line.find('(') - 1);
-            if (option.find("time") != std::string::npos)
+            if (option.find("second") != std::string::npos)
             {
-                std::string time = get_option_value_by_key(option, "time");
-                rule.time = std::stoi(time);
+                std::string second = get_option_value_by_key(option, "second");
+                rule.second = std::stoi(second);
                 rule.option = true;
             }
             if (option.find("count") != std::string::npos)

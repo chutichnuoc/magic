@@ -42,7 +42,7 @@ int get_action(std::string protocol, std::string src_ip, std::string src_port, s
                     action = rule_action_to_app_action(rule);
                     break;
                 }
-                else if (rule.count > 0 && rule.time > 0)
+                else if (rule.count > 0 && rule.second > 0)
                 {
                     if (rule.packet_count == 0)
                     {
@@ -53,7 +53,7 @@ int get_action(std::string protocol, std::string src_ip, std::string src_port, s
                     {
                         clock_t endTime = clock();
                         double passedTime = double(endTime - rule.start_time) / double(CLOCKS_PER_SEC);
-                        if (passedTime <= (double)rule.time)
+                        if (passedTime <= (double)rule.second)
                         {
                             rule.match_packet_count = true;
                             action = rule_action_to_app_action(rule);

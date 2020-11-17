@@ -15,7 +15,7 @@ public:
 
     bool option = false;
 
-    int time = 0;
+    int second = 0;
     int count = 0;
     double cpu_usage = 100;
 
@@ -36,7 +36,7 @@ public:
     void to_string()
     {
         std::cout << this->action << " " << this->protocol << " " << this->src_ip << " " << this->src_port << " -> " << this->dst_ip << " " << this->dst_port << std::endl;
-        std::cout << this->time << " " << this->count << std::endl;
+        std::cout << this->second << " " << this->count << std::endl;
     }
 };
 
