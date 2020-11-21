@@ -5,6 +5,6 @@
 
 void backup_iptables();
 void restore_iptables();
-void setup_iptables(std::string interface, std::string mode);
+void setup_iptables(std::string mode);
 
 #endif
