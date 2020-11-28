@@ -35,6 +35,16 @@ bool match_ip(std::string rule_ip, std::string packet_ip)
 
 	net_ip = get_net_ip(rule_ip, start, end);
 
+	if (rule_ip.find('!') != std::string::npos && rule_ip.find('/') == std::string::npos)
+	{
+		return rule_ip.substr(start, end).compare(packet_ip) != 0;
+	}
+
+	if (rule_ip.find('!') == std::string::npos && rule_ip.find('/') == std::string::npos) 
+	{
+		return rule_ip.compare(packet_ip) == 0;
+	}
+
 	uint32_t net_start = (net_ip & netmask);	 // first ip in subnet
 	uint32_t net_end = (net_start | ~netmask); // last ip in subnet
 	return ((ip >= net_start) && (ip <= net_end));

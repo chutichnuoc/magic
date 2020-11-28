@@ -1,6 +1,6 @@
 #include "../header/common_util.h"
 
-std::string packet_info_to_string(std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port, bool drop)
+std::string packet_info_to_string(std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port, bool drop, std::string reason)
 {
     std::string info = "";
     info += protocol + "    ";
@@ -16,7 +16,8 @@ std::string packet_info_to_string(std::string protocol, std::string src_ip, std:
     {
         info += " (dropped)";
     }
-    return info;
+    info += " " + reason;
+    return info;    
 }
 
 std::string exec(const char *cmd)
@@ -37,8 +38,15 @@ std::string exec(const char *cmd)
 
 double get_cpu_usage()
 {
-    std::string cpu_idle = exec("top -b -d1 -n1 | grep -i \"Cpu(s)\" | awk '{print substr($0, 37, 5);}'");
+    std::string cpu_idle = exec("top -b -n 1 | grep Cpu | tail -n 1 | awk '{print $8}'");
     replace(cpu_idle.begin(), cpu_idle.end(), ',', '.');
-    double cpu_usage = 100 - stod(cpu_idle);
-    return cpu_usage;
+    try
+    {
+        double cpu_usage = 100 - stod(cpu_idle);
+        return cpu_usage;
+    }
+    catch(std::exception& e)
+    {
+        return 100;
+    }
 }

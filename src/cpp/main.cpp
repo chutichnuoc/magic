@@ -49,19 +49,20 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_
 	std::string dst_ip("any");
 	std::string src_port("any");
 	std::string dst_port("any");
+	std::string reason("");
 
 	handle_ip(packet, &protocol, &src_ip, &src_port, &dst_ip, &dst_port);
 	int nf_action = NF_ACCEPT;
-	int action = get_action(protocol, src_ip, src_port, dst_ip, dst_port, rules, mode);
+	int action = get_action(protocol, src_ip, src_port, dst_ip, dst_port, &reason, rules);
 	if (action == ALERT)
 	{
-		std::string message = packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, false);
+		std::string message = packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, false, reason);
 		printf("%s\n", message.c_str());
 		log_packet_info(message);
 	}
 	else if (action == DROP && mode == IPS_MODE)
 	{
-		std::string message = packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, true);
+		std::string message = packet_info_to_string(protocol, src_ip, src_port, dst_ip, dst_port, true, reason);
 		printf("%s\n", message.c_str());
 		log_packet_info(message);
 		nf_action = NF_DROP;
