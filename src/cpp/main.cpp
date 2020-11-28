@@ -75,31 +75,8 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_
 	return nfq_set_verdict(qh, id, nf_action, 0, NULL);
 }
 
-int main(int argc, char *argv[])
+void *process_queue(void *q) 
 {
-	signal(SIGINT, handle_sigint);
-
-	if (argc != 4)
-	{
-		fprintf(stderr, "Error: unrecognized command-line options\n\n");
-		print_app_usage();
-		exit(1);
-	}
-
-	std::string capture_mode = argv[1];
-	std::string running_mode = argv[2];
-	std::string config_file = argv[3];
-
-	set_config_file_path(config_file);
-	std::string rule_file_path = get_config_value("ruleFile");
-	rules = get_rules(rule_file_path);
-
-	transform(capture_mode.begin(), capture_mode.end(), capture_mode.begin(), ::tolower);
-	mode = (capture_mode.compare("ips") == 0) ? IPS_MODE : IDS_MODE;
-
-	transform(running_mode.begin(), running_mode.end(), running_mode.begin(), ::tolower);
-	setup_iptables(running_mode);
-
 	struct nfq_handle *h;
 	struct nfq_q_handle *qh;
 	int fd;
@@ -166,6 +143,33 @@ int main(int argc, char *argv[])
 
 	printf("Closing library handle\n");
 	nfq_close(h);
+}
 
-	exit(0);
+int main(int argc, char *argv[])
+{
+	signal(SIGINT, handle_sigint);
+
+	if (argc != 4)
+	{
+		fprintf(stderr, "Error: unrecognized command-line options\n\n");
+		print_app_usage();
+		exit(1);
+	}
+
+	std::string capture_mode = argv[1];
+	std::string running_mode = argv[2];
+	std::string config_file = argv[3];
+
+	set_config_file_path(config_file);
+	std::string rule_file_path = get_config_value("ruleFile");
+	rules = get_rules(rule_file_path);
+
+	transform(capture_mode.begin(), capture_mode.end(), capture_mode.begin(), ::tolower);
+	mode = (capture_mode.compare("ips") == 0) ? IPS_MODE : IDS_MODE;
+
+	transform(running_mode.begin(), running_mode.end(), running_mode.begin(), ::tolower);
+	setup_iptables(running_mode);
+
+	process_queue(NULL);
+	return 0;
 }
