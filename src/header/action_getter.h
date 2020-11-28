@@ -9,6 +9,6 @@
 #include "common_util.h"
 
 int rule_action_to_app_action(rule_header rule);
-int get_action(std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port, std::string *reason, std::vector<rule_header> &rules);
+int get_action(std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port, std::vector<rule_header> &rules);
 
 #endif

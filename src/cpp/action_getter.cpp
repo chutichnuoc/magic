@@ -18,7 +18,7 @@ int rule_action_to_app_action(rule_header rule)
     return action;
 }
 
-int get_action(std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port, std::string *reason, std::vector<rule_header> &rules)
+int get_action(std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port, std::vector<rule_header> &rules)
 {
     int action = PASS;
     for (auto &rule : rules)
@@ -36,15 +36,11 @@ int get_action(std::string protocol, std::string src_ip, std::string src_port, s
                 if (cpu_usage >= rule.cpu_usage)
                 {
                     action = rule_action_to_app_action(rule);
-                    std::ostringstream strs;
-                    strs << cpu_usage;
-                    *reason = "cpu = " + strs.str() + "%";
                     break;
                 }
                 else if (rule.match_packet_count)
                 {
                     action = rule_action_to_app_action(rule);
-                    *reason = "dos";
                     break;
                 }
                 else if (rule.count > 0 && rule.second > 0)

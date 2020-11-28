@@ -60,7 +60,7 @@ bool match_port(std::string rule_port, std::string packet_port)
 	if (rule_port.find('!') != std::string::npos)
 	{
 		std::string orgRulePort = rule_port.substr(1, rule_port.length() - 1);
-		return !(orgRulePort.compare(packet_port) == 0);
+		return orgRulePort.compare(packet_port) != 0;
 	}
 	return false;
 }
