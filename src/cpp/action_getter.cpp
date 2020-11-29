@@ -32,8 +32,8 @@ int get_action(std::string protocol, std::string src_ip, std::string src_port, s
             }
             else
             {
-                double cpu_usage = get_cpu_usage();
-                if (cpu_usage >= rule.cpu_usage)
+                double cpu = get_cpu_last_second();
+                if (cpu >= rule.cpu_usage)
                 {
                     action = rule_action_to_app_action(rule);
                     break;

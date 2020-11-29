@@ -49,3 +49,17 @@ double get_cpu_usage()
         return 100;
     }
 }
+
+void set_cpu_last_second() 
+{
+    while(true)
+    {
+        cpu_last_second = get_cpu_usage();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+}
+
+double get_cpu_last_second()
+{
+    return cpu_last_second;
+}

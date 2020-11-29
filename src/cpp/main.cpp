@@ -220,6 +220,8 @@ int main(int argc, char *argv[])
 	transform(running_mode.begin(), running_mode.end(), running_mode.begin(), ::tolower);
 	setup_iptables(running_mode);
 
+	thread th(set_cpu_last_second);
+
 	pthread_t threads[100];
 
 	int num_queues = 3;
@@ -234,6 +236,7 @@ int main(int argc, char *argv[])
 	{
 		pthread_join(threads[i], NULL);
 	}
+	th.join();
 
 	return 0;
 }

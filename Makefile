@@ -6,7 +6,7 @@ CC = g++
 # -g: adds debugging info to .exe file
 # -Wall: turns on most compiler warnings
 CFLAGS = -Wall -pthread -lstdc++
-LIBS = -lpcap -lm -lnetfilter_queue
+LIBS = -lpcap -lm -lnetfilter_queue -lpthread -lrt -lnfnetlink 
 
 SRC := src/cpp
 OBJ := obj
