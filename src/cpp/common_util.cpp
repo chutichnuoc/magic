@@ -16,7 +16,7 @@ std::string packet_info_to_string(std::string protocol, std::string src_ip, std:
     {
         info += " (dropped)";
     }
-    return info;    
+    return info;
 }
 
 std::string exec(const char *cmd)
@@ -44,15 +44,15 @@ double get_cpu_usage()
         double cpu_usage = 100 - stod(cpu_idle);
         return cpu_usage;
     }
-    catch(std::exception& e)
+    catch (std::exception &e)
     {
         return 100;
     }
 }
 
-void set_cpu_last_second() 
+void set_cpu_last_second()
 {
-    while(true)
+    while (true)
     {
         cpu_last_second = get_cpu_usage();
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
