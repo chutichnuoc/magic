@@ -1,6 +1,8 @@
 #ifndef COMMON_UTIL_H
 #define COMMON_UTIL_H
 
+#define APP_NAME "Magic"
+
 #include <iostream>
 #include <algorithm>
 #include <array>
@@ -15,5 +17,6 @@ std::string exec(const char *cmd);
 double get_cpu_usage();
 void set_cpu_last_second();
 double get_cpu_last_second();
+void print_app_usage();
 
 #endif

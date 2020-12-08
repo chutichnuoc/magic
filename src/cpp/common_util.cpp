@@ -63,3 +63,13 @@ double get_cpu_last_second()
 {
     return cpu_last_second;
 }
+
+void print_app_usage()
+{
+	printf("Usage: %s [interface] [mode] [config]\n\n", APP_NAME);
+	printf("Options: \n");
+	printf("    c_mode    	  Capture mode (IPS/IDS)\n");
+	printf("    r_mode    	  Running mode (NET/HOST)\n");
+	printf("    config    	  Config file\n\n");
+	return;
+}

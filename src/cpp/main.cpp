@@ -1,5 +1,3 @@
-#define APP_NAME "Magic"
-
 #include <iostream>
 #include <signal.h>
 #include <netinet/in.h>
@@ -17,23 +15,6 @@
 
 vector<rule_header> rules;
 int mode = IDS_MODE;
-
-struct queueStuff
-{
-	int queue;
-	int maxqueue;
-	queueStuff(int i, int m) : queue(i), maxqueue(m) {}
-};
-
-void print_app_usage()
-{
-	printf("Usage: %s [interface] [mode] [config]\n\n", APP_NAME);
-	printf("Options: \n");
-	printf("    c_mode    	  Capture mode (IPS/IDS)\n");
-	printf("    r_mode    	  Running mode (NET/HOST)\n");
-	printf("    config    	  Config file\n\n");
-	return;
-}
 
 void handle_sigint(int sig)
 {
@@ -79,126 +60,81 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_
 	struct nfqnl_msg_packet_hdr *ph;
 	ph = nfq_get_msg_packet_hdr(nfa);
 	id = ntohl(ph->packet_id);
-	// queueStuff *p = (queueStuff *)data;
-	// printf("Queue %d\n ", p->queue);
 	return nfq_set_verdict(qh, id, nf_action, 0, NULL);
 }
 
 void *process_queue(void *q)
 {
-	queueStuff *qs = (queueStuff *)q;
+	struct nfq_handle *h;
+	struct nfq_q_handle *qh;
+	int fd;
+	int rv;
+	char buf[4096] __attribute__((aligned));
 
-	struct nfq_handle *nfq_handle = NULL;
-	nfq_handle = nfq_open();
-
-	if (!nfq_handle)
+	printf("Opening library handle\n");
+	h = nfq_open();
+	if (!h)
 	{
-		perror("nfq_open");
+		fprintf(stderr, "Error during nfq_open()\n");
 		exit(1);
 	}
 
-	printf("Unbinding...\n");
-	if (nfq_unbind_pf(nfq_handle, AF_INET) < 0)
+	printf("Unbinding existing nf_queue handler for AF_INET (if any)\n");
+	if (nfq_unbind_pf(h, AF_INET) < 0)
 	{
-		perror("nfq_unbind_pf");
+		fprintf(stderr, "Error during nfq_unbind_pf()\n");
 		exit(1);
 	}
 
-	printf("Binding to process IP packets\n");
-	if (nfq_bind_pf(nfq_handle, AF_INET) < 0)
+	printf("Binding nfnetlink_queue as nf_queue handler for AF_INET\n");
+	if (nfq_bind_pf(h, AF_INET) < 0)
 	{
-		perror("nfq_bind_pf");
-		exit(1);
-	}
-	printf("Creating netfilter handle %d\n", qs->queue);
-	struct nfq_q_handle *my_queue = NULL;
-	struct nfnl_handle *netlink_handle = NULL;
-
-	int fd = -1;
-	ssize_t res;
-	char buf[4096];
-
-	printf("Installing queue %d\n", qs->queue);
-
-	if (!(my_queue = nfq_create_queue(nfq_handle, qs->queue, &callback, q)))
-	{
-		perror("nfq_create_queue");
+		fprintf(stderr, "Error during nfq_bind_pf()\n");
 		exit(1);
 	}
 
-	printf("Myqueue for %d is %p\n", qs->queue, my_queue);
-	fflush(stdout);
-
-	// Turn on packet copy mode ... NOTE: only copy_packet really works
-	int what_to_copy = NFQNL_COPY_PACKET;
-	// int what_to_copy = NFQNL_COPY_META;
-
-	// A little more than the standard header...
-	// int size_to_copy = sizeof(ip) + sizeof(tcphdr) + 10;
-	int size_to_copy = 10000;
-
-	if (nfq_set_mode(my_queue, what_to_copy, size_to_copy) < 0)
+	printf("binding this socket to queue '0'\n");
+	qh = nfq_create_queue(h, 0, &callback, NULL);
+	if (!qh)
 	{
-		perror("nfq_set_mode");
+		fprintf(stderr, "Error during nfq_create_queue()\n");
 		exit(1);
 	}
 
-	printf("Set mode for %d\n", qs->queue);
-	fflush(stdout);
-
-	if (nfq_set_queue_maxlen(my_queue, qs->maxqueue) < 0)
+	printf("Setting copy_packet mode\n");
+	if (nfq_set_mode(qh, NFQNL_COPY_PACKET, 0xffff) < 0)
 	{
-		printf("Couldn't set queue max len to %d.\n", qs->maxqueue);
-	}
-	else
-	{
-		printf("Set queue length to %d packets\n", qs->maxqueue);
-		fflush(stdout);
-	}
-
-	netlink_handle = nfq_nfnlh(nfq_handle);
-
-	if (!netlink_handle)
-	{
-		perror("nfq_nfnlh");
+		fprintf(stderr, "Can't set packet_copy mode\n");
 		exit(1);
 	}
 
-	printf("Got netlink handle for %d\n", qs->queue);
-	fflush(stdout);
+	fd = nfq_fd(h);
 
-	nfnl_rcvbufsiz(netlink_handle, qs->maxqueue * 1500);
+	// para el tema del loss:   while ((rv = recv(fd, buf, sizeof(buf), 0)) && rv >= 0)
 
-	printf("Set recv buffer size to %d\n", qs->maxqueue * 1500);
-	fflush(stdout);
+	printf("Start capturing...\n");
 
-	fd = nfnl_fd(netlink_handle);
-
-	printf("Queue #%d: fd = %d\n", qs->queue, fd);
-	fflush(stdout);
-
-	int opt = 1;
-	setsockopt(fd, SOL_NETLINK, NETLINK_BROADCAST_SEND_ERROR, &opt, sizeof(int));
-	setsockopt(fd, SOL_NETLINK, NETLINK_NO_ENOBUFS, &opt, sizeof(int));
-
-	printf("Ignoring buffer overflows...folklore\n");
-	fflush(stdout);
-
-	while ((res = recv(fd, buf, sizeof(buf), 0)) && res >= 0)
+	while ((rv = recv(fd, buf, sizeof(buf), 0)))
 	{
-		nfq_handle_packet(nfq_handle, buf, res);
+		nfq_handle_packet(h, buf, rv);
 	}
 
-	perror("recv");
+	printf("Unbinding from queue 0\n");
+	nfq_destroy_queue(qh);
 
-	nfq_destroy_queue(my_queue);
-	nfq_close(nfq_handle);
+#ifdef INSANE
+	/* normally, applications SHOULD NOT issue this command, since
+	 * it detaches other programs/sockets from AF_INET, too ! */
+	printf("Unbinding from AF_INET\n");
+	nfq_unbind_pf(h, AF_INET);
+#endif
+
+	printf("Closing library handle\n");
+	nfq_close(h);
 }
 
-int main(int argc, char *argv[])
+void prepare(int argc, char *argv[])
 {
-	signal(SIGINT, handle_sigint);
-
 	if (argc != 4)
 	{
 		fprintf(stderr, "Error: unrecognized command-line options\n\n");
@@ -219,24 +155,19 @@ int main(int argc, char *argv[])
 
 	transform(running_mode.begin(), running_mode.end(), running_mode.begin(), ::tolower);
 	setup_iptables(running_mode);
+}
 
+void run()
+{
 	thread th(set_cpu_last_second);
-
-	pthread_t threads[100];
-
-	int num_queues = 3;
-	int max_queue = 10000;
-	for (int i = 0; i < num_queues; i++)
-	{
-		pthread_create(&threads[i], NULL, process_queue, new queueStuff(i, max_queue));
-		// sleep(1);
-	}
-
-	for (int i = 0; i < num_queues; i++)
-	{
-		pthread_join(threads[i], NULL);
-	}
+	process_queue(NULL);
 	th.join();
+}
 
+int main(int argc, char *argv[])
+{
+	signal(SIGINT, handle_sigint);
+	prepare(argc, argv);
+	run();
 	return 0;
 }
