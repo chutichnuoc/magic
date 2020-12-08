@@ -1,4 +1,3 @@
-#define APP_NAME "Magic"
 
 #include <iostream>
 #include <signal.h>
@@ -14,26 +13,10 @@
 #include "../header/packet_parser.h"
 #include "../header/common_util.h"
 #include "../header/logger.h"
+#include "../header/queue_stuff.h"
 
 vector<rule_header> rules;
 int mode = IDS_MODE;
-
-struct queueStuff
-{
-	int queue;
-	int maxqueue;
-	queueStuff(int i, int m) : queue(i), maxqueue(m) {}
-};
-
-void print_app_usage()
-{
-	printf("Usage: %s [interface] [mode] [config]\n\n", APP_NAME);
-	printf("Options: \n");
-	printf("    c_mode    	  Capture mode (IPS/IDS)\n");
-	printf("    r_mode    	  Running mode (NET/HOST)\n");
-	printf("    config    	  Config file\n\n");
-	return;
-}
 
 void handle_sigint(int sig)
 {
@@ -79,14 +62,14 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_
 	struct nfqnl_msg_packet_hdr *ph;
 	ph = nfq_get_msg_packet_hdr(nfa);
 	id = ntohl(ph->packet_id);
-	// queueStuff *p = (queueStuff *)data;
+	// queue_stuff *p = (queue_stuff *)data;
 	// printf("Queue %d\n ", p->queue);
 	return nfq_set_verdict(qh, id, nf_action, 0, NULL);
 }
 
 void *process_queue(void *q)
 {
-	queueStuff *qs = (queueStuff *)q;
+	queue_stuff *qs = (queue_stuff *)q;
 
 	struct nfq_handle *nfq_handle = NULL;
 	nfq_handle = nfq_open();
@@ -110,6 +93,7 @@ void *process_queue(void *q)
 		perror("nfq_bind_pf");
 		exit(1);
 	}
+
 	printf("Creating netfilter handle %d\n", qs->queue);
 	struct nfq_q_handle *my_queue = NULL;
 	struct nfnl_handle *netlink_handle = NULL;
@@ -119,14 +103,13 @@ void *process_queue(void *q)
 	char buf[4096];
 
 	printf("Installing queue %d\n", qs->queue);
-
 	if (!(my_queue = nfq_create_queue(nfq_handle, qs->queue, &callback, q)))
 	{
 		perror("nfq_create_queue");
 		exit(1);
 	}
 
-	printf("Myqueue for %d is %p\n", qs->queue, my_queue);
+	printf("Queue for %d is %p\n", qs->queue, my_queue);
 	fflush(stdout);
 
 	// Turn on packet copy mode ... NOTE: only copy_packet really works
@@ -181,7 +164,7 @@ void *process_queue(void *q)
 	setsockopt(fd, SOL_NETLINK, NETLINK_BROADCAST_SEND_ERROR, &opt, sizeof(int));
 	setsockopt(fd, SOL_NETLINK, NETLINK_NO_ENOBUFS, &opt, sizeof(int));
 
-	printf("Ignoring buffer overflows...folklore\n");
+	printf("Ignoring buffer overflows...\n");
 	fflush(stdout);
 
 	while ((res = recv(fd, buf, sizeof(buf), 0)) && res >= 0)
@@ -195,10 +178,8 @@ void *process_queue(void *q)
 	nfq_close(nfq_handle);
 }
 
-int main(int argc, char *argv[])
+void prepare(int argc, char *argv[])
 {
-	signal(SIGINT, handle_sigint);
-
 	if (argc != 4)
 	{
 		fprintf(stderr, "Error: unrecognized command-line options\n\n");
@@ -219,24 +200,30 @@ int main(int argc, char *argv[])
 
 	transform(running_mode.begin(), running_mode.end(), running_mode.begin(), ::tolower);
 	setup_iptables(running_mode);
+}
 
+void run()
+{
 	thread th(set_cpu_last_second);
-
 	pthread_t threads[100];
-
 	int num_queues = 3;
 	int max_queue = 10000;
 	for (int i = 0; i < num_queues; i++)
 	{
-		pthread_create(&threads[i], NULL, process_queue, new queueStuff(i, max_queue));
+		pthread_create(&threads[i], NULL, process_queue, new queue_stuff(i, max_queue));
 		// sleep(1);
 	}
-
 	for (int i = 0; i < num_queues; i++)
 	{
 		pthread_join(threads[i], NULL);
 	}
 	th.join();
+}
 
+int main(int argc, char *argv[])
+{
+	signal(SIGINT, handle_sigint);
+	prepare(argc, argv);
+	run();
 	return 0;
 }
