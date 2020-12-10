@@ -41,22 +41,30 @@ int get_action(std::string protocol, std::string src_ip, std::string src_port, s
                 else if (rule.match_packet_count)
                 {
                     action = rule_action_to_app_action(rule);
+                    auto curr_time = std::chrono::high_resolution_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(curr_time - rule.start_time_out).count();
+                    if (duration >= rule.timeout * 1000000)
+                    {
+                        rule.packet_count = 0;
+                        rule.match_packet_count = false;
+                    }
                     break;
                 }
                 else if (rule.count > 0 && rule.second > 0)
                 {
                     if (rule.packet_count == 0)
                     {
-                        rule.start_time = clock();
+                        rule.start_time = std::chrono::high_resolution_clock::now();
                     }
                     rule.packet_count++;
                     if (rule.packet_count >= rule.count)
                     {
-                        clock_t endTime = clock();
-                        double passedTime = double(endTime - rule.start_time) / double(CLOCKS_PER_SEC);
-                        if (passedTime <= (double)rule.second)
+                        auto curr_time = std::chrono::high_resolution_clock::now();
+                        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(curr_time - rule.start_time).count();
+                        if (duration <= rule.second * 1000000)
                         {
                             rule.match_packet_count = true;
+                            rule.start_time_out = std::chrono::high_resolution_clock::now();
                             action = rule_action_to_app_action(rule);
                             break;
                         }

@@ -17,11 +17,14 @@ public:
 
     int second = 0;
     int count = 0;
+    int timeout = 0;
     double cpu_usage = 100;
 
-    clock_t start_time;
+    std::chrono::high_resolution_clock::time_point start_time;
     int packet_count = 0;
     bool match_packet_count = false;
+
+    std::chrono::high_resolution_clock::time_point start_time_out;
 
     rule_header(std::string action, std::string protocol, std::string src_ip, std::string src_port, std::string dst_ip, std::string dst_port)
     {

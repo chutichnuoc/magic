@@ -31,6 +31,12 @@ std::vector<rule_header> get_rules(std::string file_path)
                 rule.count = std::stoi(count);
                 rule.option = true;
             }
+            if (option.find("timeout") != std::string::npos)
+            {
+                std::string timeout = get_option_value_by_key(option, "timeout");
+                rule.timeout = std::stoi(timeout);
+                rule.option = true;
+            }
             if (option.find("cpu") != std::string::npos)
             {
                 std::string cpu = get_option_value_by_key(option, "cpu");
